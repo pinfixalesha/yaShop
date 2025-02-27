@@ -1,0 +1,46 @@
+databaseChangeLog:
+  - changeSet:
+      id: yaShop tables tovars
+      author: Pinayev Aleksey
+      changes:
+        - createTable:
+            schemaName: public
+            tableName: tovars
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                  remarks: "Наименование товара"
+              - column:
+                  name: picture
+                  type: text
+                  constraints:
+                    nullable: true
+                  remarks: "Картинка товара в формате base64"
+              - column:
+                  name: description
+                  type: text
+                  constraints:
+                    nullable: true
+                  remarks: "Описание товара"
+              - column:
+                  name: price
+                  type: decimal(19, 2)
+                  constraints:
+                    nullable: false
+                  remarks: "Цена товара"
+        - createIndex:
+            tableName: tovars
+            indexName: idx_tovars_name
+            columns:
+              - column:
+                  name: name

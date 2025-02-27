@@ -1,17 +1,18 @@
-version: '3.8'
-
 services:
   postgres-db:
-    image: postgres:latest
+    image: postgres
     container_name: postgres-db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: yaShop
       POSTGRES_PASSWORD: 12345
       POSTGRES_DB: yaShop
     ports:
-      - "5431:5431"
+      - "5433:5432"
     volumes:
-      - postgres_data:/lib/postgresql/data
+      - .pg-oper-data:/var/lib/postgresql/data
+    networks:
+      postgres_network:
 
-volumes:
-  postgres_data:
+networks:
+  postgres_network:

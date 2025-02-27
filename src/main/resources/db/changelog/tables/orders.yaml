@@ -1,0 +1,105 @@
+databaseChangeLog:
+  - changeSet:
+      id: yaShop tables orders
+      author: Pinayev Aleksey
+      changes:
+        - createTable:
+            tableName: orders
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  remarks: "Уникальный идентификатор заказа"
+              - column:
+                  name: total_amount
+                  type: decimal(19, 2)
+                  constraints:
+                    nullable: false
+                  remarks: "Общая сумма заказа"
+              - column:
+                  name: customer_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                  remarks: "Идентификатор клиента, оформившего заказ"
+              - column:
+                  name: order_date
+                  type: timestamp
+                  constraints:
+                    nullable: false
+                  remarks: "Дата и время оформления заказа"
+              - column:
+                  name: order_number
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                  remarks: "Номер заказа"
+        - createIndex:
+            tableName: orders
+            indexName: idx_orders_customer_and_date
+            columns:
+              - column:
+                  name: customer_id
+              - column:
+                  name: order_date
+        - createIndex:
+            tableName: orders
+            indexName: idx_orders_order_number
+            unique: true
+            columns:
+              - column:
+                  name: order_number
+        - createTable:
+            tableName: order_items
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_order_items_order_id
+                    references: orders(id)
+                  remarks: "Ссылка на заказ"
+              - column:
+                  name: tovar_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_order_items_tovar_id
+                    references: tovars(id)
+                  remarks: "Ссылка на товар"
+              - column:
+                  name: quantity
+                  type: int
+                  constraints:
+                    nullable: false
+                  remarks: "Количество"
+              - column:
+                  name: price
+                  type: decimal(19, 2)
+                  constraints:
+                    nullable: false
+                  remarks: "Цена товара"
+        - createIndex:
+            tableName: order_items
+            indexName: idx_order_items_order_id
+            columns:
+              - column:
+                  name: order_id
+        - createIndex:
+            tableName: order_items
+            indexName: idx_order_items_tovar_id
+            columns:
+              - column:
+                  name: tovar_id

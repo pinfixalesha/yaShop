@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: yaShop tables basket
+      author: Pinayev Aleksey
+      changes:
+        - createTable:
+            schemaName: public
+            tableName: basket
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tovar_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_basket_tovar_id
+                    references: tovars(id)
+                  remarks: "Ссылка на товар"
+              - column:
+                  name: quantity
+                  type: int
+                  constraints:
+                    nullable: false
+                  remarks: "Количество"
+              - column:
+                  name: customer_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                  remarks: "Идентификатор клиента"
+        - createIndex:
+            tableName: basket
+            indexName: idx_basket_customer_id
+            columns:
+              - column:
+                  name: customer_id
