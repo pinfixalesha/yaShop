@@ -55,17 +55,29 @@
 
 ## Установка и запуск приложения
 
-### 1. Клонирование репозитория
+### Клонирование репозитория
 
 ```bash
 git clone https://github.com/pinfixalesha/yaShop.git 
 ```
 
+### Развертывание PostgreSQL в Docker
+
+1. Выполните следующую команду для запуска PostgreSQL
+```bash
+docker-compose up -d 
+```
+2. Проверка работы PostgreSQL
+```bash
+docker ps 
+```
+Необхдоимо убедиться в наличии контейнера с именем postgres-db в списке активных контейнеров.
+
 ## Запуск приложения
 
 1. Соберите приложение с помощью Gradle:
    ```bash
-   gradle jar
+   gradle build
    ```
 2. Запустите приложение:
    ```bash
