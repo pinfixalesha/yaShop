@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.yaShop.entities.Tovar;
 
 @Repository
-public interface TovarsRepository  extends JpaRepository<Tovar, Long> {
+public interface TovarRepository extends JpaRepository<Tovar, Long> {
 }

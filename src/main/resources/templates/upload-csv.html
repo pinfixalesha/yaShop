@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Загрузка товаров из CSV</title>
+</head>
+<body>
+<h1>Загрузка товаров из CSV</h1>
+
+<form method="POST" enctype="multipart/form-data" th:action="@{/upload-csv}">
+    <label for="file">Выберите файл CSV:</label>
+    <input type="file" id="file" name="file" accept=".csv" required /><br /><br />
+    <button type="submit">Загрузить</button>
+</form>
+
+<div th:if="${message}">
+    <p th:text="${message}"></p>
+</div>
+</body>
+</html>
