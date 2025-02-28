@@ -114,6 +114,8 @@ docker ps
 - Описание: строка, может быть пустой.
 - Цена: число с двумя знаками после запятой, обязательно.
 
+Пример файла см. https://github.com/pinfixalesha/yaShop/blob/main/src/main/resources/tovars.csv
+
 ## Тестирование
 
 Приложение покрыто юнит- и интеграционными тестами с использованием JUnit 5, TestContext Framework и Spring Boot Test. Для запуска тестов выполните:
