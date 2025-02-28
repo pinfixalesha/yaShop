@@ -24,25 +24,25 @@
                     <p>
                         <label for="sort">Сортировка: </label>
                         <select id="sort" name="sort" onchange="this.form.submit()">
-                            <option value="NO" th:selected="${sort=='NO'}">нет</option>
-                            <option value="ALPHA" th:selected="${sort=='ALPHA'}">по алфавиту</option>
-                            <option value="PRICE" th:selected="${sort=='PRICE'}">по цене</option>
+                            <option value="NO" th:selected="${paging.getSort()=='NO'}">нет</option>
+                            <option value="ALPHA" th:selected="${paging.getSort()=='ALPHA'}">по алфавиту</option>
+                            <option value="PRICE" th:selected="${paging.getSort()=='PRICE'}">по цене</option>
                         </select>
                     </p>
                     <p>
                         <label for="pageSize">Число товаров: </label>
                         <select id="pageSize" name="pageSize" onchange="this.form.submit()">
-                            <option value="5" th:selected="${paging.pageSize()==5}">5</option>
-                            <option value="10" th:selected="${paging.pageSize()==10}">10</option>
-                            <option value="20" th:selected="${paging.pageSize()==20}">20</option>
-                            <option value="50" th:selected="${paging.pageSize()==50}">50</option>
-                            <option value="100" th:selected="${paging.pageSize()==100}">100</option>
+                            <option value="5" th:selected="${paging.getPageSize()==5}">5</option>
+                            <option value="10" th:selected="${paging.getPageSize()==10}">10</option>
+                            <option value="20" th:selected="${paging.getPageSize()==20}">20</option>
+                            <option value="50" th:selected="${paging.getPageSize()==50}">50</option>
+                            <option value="100" th:selected="${paging.getPageSize()==100}">100</option>
                         </select>
                     </p>
                     <p>
-                        <button th:if="${paging.hasPrevious()}" name="pageNumber" th:value="${paging.pageNumber()-1}">&lt;</button>
-                        <span th:text="${'Страница: '+paging.pageNumber()}"></span>
-                        <button th:if="${paging.hasNext()}" name="pageNumber" th:value="${paging.pageNumber()+1}">&gt;</button>
+                        <button th:if="${paging.hasPrevious()}" name="pageNumber" th:value="${paging.getPageNumber()-1}">&lt;</button>
+                        <span th:text="${'Страница: '+paging.getPageNumber()}"></span>
+                        <button th:if="${paging.hasNext()}" name="pageNumber" th:value="${paging.getPageNumber()+1}">&gt;</button>
                     </p>
                 </form>
             </td>
@@ -53,7 +53,7 @@
                     <tr>
                         <td>
                             <a th:href="${'/items/'+item.getId()}">
-                                <img width="300" height="300" th:src="${'http://localhost:8080/'+item.getImgPath()}">
+                                <img th:if="${item.getImg() != null && item.getImg()>0}" th:src="'data:image/png;base64, '+${item.getImg()}" alt="Картинка" width="300" height="200"/>
                             </a>
                         </td>
                     </tr>

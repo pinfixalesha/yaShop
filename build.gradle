@@ -30,8 +30,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'com.opencsv:opencsv:5.10'
 
-//	implementation 'com.zaxxer:HikariCP:5.0.1'
-//	implementation 'org.liquibase:liquibase-core'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
