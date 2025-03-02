@@ -1,10 +1,10 @@
 package ru.yandex.practicum.yaShop.mapping;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.yaShop.entities.Tovar;
 import ru.yandex.practicum.yaShop.model.TovarModel;
 
-@Service
+@Component
 public class TovarMapper {
 
     public TovarModel mapToModel(Tovar tovar) {

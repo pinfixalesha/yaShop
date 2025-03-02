@@ -1,10 +1,12 @@
 package ru.yandex.practicum.yaShop.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import ru.yandex.practicum.yaShop.entities.Basket;
 import ru.yandex.practicum.yaShop.mapping.TovarMapper;
 import ru.yandex.practicum.yaShop.model.TovarModel;

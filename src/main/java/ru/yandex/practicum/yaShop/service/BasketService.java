@@ -4,10 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.yaShop.entities.Basket;
 import ru.yandex.practicum.yaShop.entities.Tovar;
+import ru.yandex.practicum.yaShop.mapping.BasketMapper;
+import ru.yandex.practicum.yaShop.model.BasketModel;
 import ru.yandex.practicum.yaShop.repositories.BasketRepository;
 import ru.yandex.practicum.yaShop.repositories.TovarRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BasketService {
@@ -17,6 +21,9 @@ public class BasketService {
 
     @Autowired
     private TovarRepository tovarRepository;
+
+    @Autowired
+    private BasketMapper basketMapper;
 
 
     public void addToBasket(Long tovarId, Long customerId) {
@@ -60,5 +67,13 @@ public class BasketService {
             Basket basket = optionalBasket.get();
             basketRepository.delete(basket);
         }
+    }
+
+    public List<BasketModel> getBasketByCustomerId(Long customerId) {
+        List<Basket> baskets = basketRepository.findByCustomerId(customerId);
+
+        return baskets.stream()
+                .map(basketMapper::mapToBasketModel)
+                .collect(Collectors.toList());
     }
 }
