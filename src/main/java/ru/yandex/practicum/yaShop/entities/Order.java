@@ -38,7 +38,4 @@ public class Order {
     @Column(name = "order_number", nullable = false, unique = true)
     private String orderNumber;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<OrderItem> orderItems;
-
 }
