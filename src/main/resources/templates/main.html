@@ -18,7 +18,7 @@
                 <form>
                     <p>
                         <label for="search">Найти: </label>
-                        <input id="search" style="width:300px;" name="search" th:value="${search}">
+                        <input id="search" style="width:300px;" name="search" th:value="${paging.getSearch()}">
                         <button name="action">&#128269;</button>
                     </p>
                     <p>
@@ -53,13 +53,13 @@
                     <tr>
                         <td>
                             <a th:href="${'/items/'+item.getId()}">
-                                <img th:if="${item.getImg() != null && item.getImg()>0}" th:src="'data:image/png;base64, '+${item.getImg()}" alt="Картинка" width="300" height="200"/>
+                                <img th:if="${item.getPicture() != null && item.getPicture().length>0}" th:src="'data:image/png;base64, '+${item.getPicture()}" alt="Картинка" width="300" height="200"/>
                             </a>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <b th:text="${item.getTitle()}"></b>
+                            <b th:text="${item.getName()}"></b>
                         </td>
                         <td>
                             <b th:text="${item.getPrice()}+' руб.'"></b>
