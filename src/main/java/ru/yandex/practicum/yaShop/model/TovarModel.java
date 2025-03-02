@@ -18,5 +18,5 @@ public class TovarModel {
     private String picture;
     private String description;
     private BigDecimal price;
-    private Long count;
+    private Integer count;
 }

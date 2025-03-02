@@ -14,7 +14,7 @@ public class TovarMapper {
                 .name(tovar.getName())
                 .description(tovar.getDescription())
                 .picture(tovar.getPicture())
-                .count(0L)
+                .count(0)
                 .build();
     }
 

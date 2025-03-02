@@ -52,7 +52,7 @@
                 <table>
                     <tr>
                         <td>
-                            <a th:href="${'/main/items/'+item.getId()}">
+                            <a th:href="${'/items/'+item.getId()}">
                                 <img th:if="${item.getPicture() != null && item.getPicture().length>0}" th:src="'data:image/png;base64, '+${item.getPicture()}" alt="Картинка" width="300" height="200"/>
                             </a>
                         </td>
