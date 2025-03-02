@@ -16,25 +16,25 @@
     <b>ГЛАВНАЯ &cudarrr;</b>
 </a>
 <h1 style="text-align:center" th:if="${newOrder}">Поздравляем! Успешная покупка! &#128578;</h1>
-<table style="width:70%;margin-left:auto;margin-right:auto;">
+<table th:if="${order!=null}"  style="width:70%;margin-left:auto;margin-right:auto;">
     <tr>
         <td>
-            <h2 th:text="${'Заказ №'+order.id()}"></h2>
+            <h2 th:text="${'Заказ №'+order.getOrderNumber()}"></h2>
         </td>
     </tr>
-    <tr th:each="item : ${order.items()}">
+    <tr th:each="item : ${order.getItems()}">
         <td>
             <table>
                 <tr>
                     <td>
-                        <a th:href="${'/items/'+item.getId()}">
+                        <a th:href="${'/items/'+item.getTovarId()}">
                             <img th:if="${item.getPicture() != null && item.getPicture().length>0}" th:src="'data:image/png;base64, '+${item.getPicture()}" alt="Картинка" width="300" height="200"/>
                         </a>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <b th:text="${item.getTitle()}"></b>
+                        <b th:text="${item.getTovarName()}"></b>
                     </td>
                     <td>
                         <b th:text="${item.getCount()}+' шт.'"></b>
@@ -48,7 +48,7 @@
     </tr>
     <tr>
         <td>
-            <h3 th:text="${'Сумма: '+order.totalSum()}+' руб.'"></h3>
+            <h3 th:text="${'Сумма: '+order.getTotalAmount()}+' руб.'"></h3>
         </td>
     </tr>
 </table>
