@@ -2,14 +2,13 @@ package ru.yandex.practicum.yaShop.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.WebRequest;
-import ru.yandex.practicum.yaShop.entities.Tovar;
 import ru.yandex.practicum.yaShop.model.PagingPageInfo;
 import ru.yandex.practicum.yaShop.model.TovarModel;
 import ru.yandex.practicum.yaShop.service.TovarService;
@@ -26,7 +25,7 @@ public class MainController {
     private TovarService tovarService;
 
     @GetMapping("/items")
-    public String mainDefault(@RequestParam(required = false, name = "search") String search,
+    public String getListTovars(@RequestParam(required = false, name = "search") String search,
                               @RequestParam(required = false, name = "sort") String sort,
                               @RequestParam(required = false, name = "pageSize") Integer pageSize,
                               @RequestParam(required = false, name = "pageNumber") Integer pageNumber,
@@ -52,6 +51,13 @@ public class MainController {
         model.addAttribute("items", tovars);
         model.addAttribute("paging",paging);
         return "main";
+    }
+
+    @GetMapping("/items/{id}")
+    public String getTovar(@PathVariable(name = "id") Long id, Model model) {
+        TovarModel tovar = tovarService.getTovarById(id);
+        model.addAttribute("item", tovar);
+        return "item";
     }
 
 

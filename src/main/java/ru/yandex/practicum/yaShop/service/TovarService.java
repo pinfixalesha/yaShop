@@ -12,6 +12,7 @@ import ru.yandex.practicum.yaShop.model.TovarModel;
 import ru.yandex.practicum.yaShop.repositories.TovarRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,5 +50,11 @@ public class TovarService {
         return tovarRepository.findByNameContainingIgnoreCase(search, pageable).stream()
                 .map(tovarMapper::mapToModel)
                 .collect(Collectors.toList());
+    }
+
+    public TovarModel getTovarById(Long id) {
+        return tovarRepository.findById(id)
+                .map(tovarMapper::mapToModel)
+                .orElse(null);
     }
 }
