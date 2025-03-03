@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.yaShop.model.OrderModel;
+import ru.yandex.practicum.yaShop.service.CustomerServices;
 import ru.yandex.practicum.yaShop.service.OrderService;
+
+import java.util.List;
 
 @Controller
 @AllArgsConstructor
@@ -18,6 +21,9 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private CustomerServices customerServices;
 
     @GetMapping("/{id}")
     public String getOrder(@PathVariable(name = "id") Long id,
@@ -32,5 +38,13 @@ public class OrderController {
             model.addAttribute("newOrder", newOrder);
         }
         return "order";
+    }
+
+    @GetMapping
+    public String getOrders(Model model) {
+
+        List<OrderModel> ordersModel=orderService.getOrdersByCustomer(customerServices.getCustomer());
+        model.addAttribute("orders", ordersModel);
+        return "orders";
     }
 }

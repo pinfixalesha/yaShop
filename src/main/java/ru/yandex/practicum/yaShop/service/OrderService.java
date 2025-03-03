@@ -37,4 +37,12 @@ public class OrderService {
 
         return orderModel;
     }
+
+
+    public List<OrderModel> getOrdersByCustomer(Long customerId) {
+        return orderRepository.findByCustomerId(customerId).stream()
+                .map(orderMapper::mapToOrderModel)
+                .collect(Collectors.toList());
+    }
+
 }
