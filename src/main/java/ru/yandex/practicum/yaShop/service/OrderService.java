@@ -3,13 +3,11 @@ package ru.yandex.practicum.yaShop.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.yaShop.mapping.OrderMapper;
-import ru.yandex.practicum.yaShop.model.OrderItemModel;
 import ru.yandex.practicum.yaShop.model.OrderModel;
 import ru.yandex.practicum.yaShop.repositories.OrderItemRepository;
 import ru.yandex.practicum.yaShop.repositories.OrderRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

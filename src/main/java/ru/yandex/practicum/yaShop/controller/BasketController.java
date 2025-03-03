@@ -9,10 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.yandex.practicum.yaShop.model.BasketModel;
-import ru.yandex.practicum.yaShop.model.TovarModel;
 import ru.yandex.practicum.yaShop.service.BasketService;
 import ru.yandex.practicum.yaShop.service.CustomerServices;
-import ru.yandex.practicum.yaShop.service.TovarService;
 
 import java.math.BigDecimal;
 import java.util.List;

@@ -9,7 +9,6 @@ import ru.yandex.practicum.yaShop.entities.Tovar;
 import ru.yandex.practicum.yaShop.repositories.TovarRepository;
 import com.opencsv.CSVReader;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
