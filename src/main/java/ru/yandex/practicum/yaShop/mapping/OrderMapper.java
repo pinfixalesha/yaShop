@@ -14,12 +14,13 @@ public class OrderMapper {
             return null;
         }
 
-        OrderModel orderModel = new OrderModel();
-        orderModel.setId(order.getId());
-        orderModel.setTotalAmount(order.getTotalAmount());
-        orderModel.setCustomerId(order.getCustomerId());
-        orderModel.setOrderDate(order.getOrderDate());
-        orderModel.setOrderNumber(order.getOrderNumber());
+        OrderModel orderModel = OrderModel.builder()
+                .id(order.getId())
+                .totalAmount(order.getTotalAmount())
+                .customerId(order.getCustomerId())
+                .orderDate(order.getOrderDate())
+                .orderNumber(order.getOrderNumber())
+                .build();
 
         return orderModel;
     }
@@ -29,13 +30,15 @@ public class OrderMapper {
             return null;
         }
 
-        OrderItemModel orderItemModel = new OrderItemModel();
-        orderItemModel.setId(orderItem.getId());
-        orderItemModel.setTovarId(orderItem.getTovar().getId());
-        orderItemModel.setTovarName(orderItem.getTovar().getName());
-        orderItemModel.setPicture(orderItem.getTovar().getPicture());
-        orderItemModel.setCount(orderItem.getQuantity());
-        orderItemModel.setPrice(orderItem.getPrice());
+        OrderItemModel orderItemModel = OrderItemModel.builder()
+                .id(orderItem.getId())
+                .tovarId(orderItem.getTovar().getId())
+                .tovarName(orderItem.getTovar().getName())
+                .picture(orderItem.getTovar().getPicture())
+                .count(orderItem.getQuantity())
+                .price(orderItem.getPrice())
+                .build();
+
 
         return orderItemModel;
     }
