@@ -9,10 +9,10 @@
 
 ### Технические требования:
 1. **Язык программирования**: Java 21
-2. **Фреймворк**: Spring Boot
+2. **Фреймворк**: Spring Boot + WebFlux
 3. **Система сборки**: Gradle
 4. **База данных**: Персистентная (PostgreSQL)
-5. **Веб-сервер**: Tomcat
+5. **Веб-сервер**: Netty
 6. **Тестирование**: JUnit 5, TestContext Framework, Spring Boot Test
 7. **Контейнеризация**: Docker
 
