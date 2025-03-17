@@ -1,11 +1,8 @@
 package ru.yandex.practicum.yaShop.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,26 +11,24 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@Entity
 @Table(name = "orders", schema = "public")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "total_amount", precision = 19, scale = 2, nullable = false)
+    @Column("total_amount")
     private BigDecimal totalAmount;
 
-    @Column(name = "customer_id", nullable = false)
+    @Column("customer_id")
     private Long customerId;
 
-    @Column(name = "order_date", nullable = false)
+    @Column("order_date")
     private LocalDateTime orderDate;
 
-    @Column(name = "order_number", nullable = false, unique = true)
+    @Column("order_number")
     private String orderNumber;
 
 }

@@ -5,7 +5,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.yaShop.entities.Basket;
+import ru.yandex.practicum.yaShop.entities.Tovar;
 import ru.yandex.practicum.yaShop.mapping.TovarMapper;
 import ru.yandex.practicum.yaShop.model.TovarModel;
 import ru.yandex.practicum.yaShop.repositories.BasketRepository;
@@ -26,16 +29,15 @@ public class TovarService {
     @Autowired
     private BasketRepository basketRepository;
 
-    public long getTotalTovarCount() {
+    public Mono<Long> getTotalTovarCount() {
         return tovarRepository.count();
     }
 
-    public List<TovarModel> getTovarsWithPaginationAndSort(int page,
+    public Flux<TovarModel> getTovarsWithPaginationAndSort(int page,
                                                            int size,
                                                            String sortType,
                                                            String search,
                                                            Long customerId) {
-
         Sort sort;
         if (sortType.equalsIgnoreCase("ALPHA")) {
             sort = Sort.by(Sort.Direction.ASC, "name");
@@ -44,52 +46,31 @@ public class TovarService {
         } else {
             sort = Sort.by(Sort.Direction.ASC, "id");
         }
-        List<Basket> basket=basketRepository.findByCustomerId(customerId);
+        Flux<Basket> basketFlux = basketRepository.findByCustomerId(customerId);
+        int offset = page * size;
 
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        List<TovarModel> tovarsModel;
+        Flux<Tovar> tovarsFlux;
         if (search == null || search.isEmpty()) {
-            tovarsModel=tovarRepository.findAll(pageable).stream()
-                    .map(tovarMapper::mapToModel)
-                    .collect(Collectors.toList());
+            tovarsFlux = tovarRepository.findAllBy(sort, offset, size);
+        } else {
+            tovarsFlux = tovarRepository.findByNameContainingIgnoreCase(search, sort, offset, size);
         }
 
-        tovarsModel=tovarRepository.findByNameContainingIgnoreCase(search, pageable).stream()
-                .map(tovarMapper::mapToModel)
-                .collect(Collectors.toList());
+        return basketFlux.collectList() // Собираем корзину в список
+                .flatMapMany(basket -> tovarsFlux
+                        .map(tovarMapper::mapToModel) // Преобразуем товары в DTO
+                        .map(tovarModel -> {
+                            // Устанавливаем количество товаров в корзине
+                            Integer count = basket.stream()
+                                    .filter(b -> b.getTovar().getId().equals(tovarModel.getId()))
+                                    .findFirst()
+                                    .map(Basket::getQuantity)
+                                    .orElse(0);
+                            tovarModel.setCount(count);
+                            return tovarModel;
+                        }));
 
-        return tovarsModel.stream()
-                .map(tovarModel -> {
-                    tovarModel.setCount(basket.stream()
-                            .filter(b -> b.getTovar().getId().equals(tovarModel.getId()))
-                            .findFirst()
-                            .map(Basket::getQuantity)
-                            .orElse(0));
-                    return tovarModel;
-                })
-                .collect(Collectors.toList());
+
     }
 
-    public TovarModel getTovarById(Long id,Long customerId) {
-
-        List<Basket> basket=basketRepository.findByCustomerId(customerId);
-
-        TovarModel tovarModel=tovarRepository.findById(id)
-                .map(tovarMapper::mapToModel)
-                .orElse(null);
-
-        if (tovarModel == null) {
-            return null; // Товар не найден
-        }
-
-        // Находим количество товара в корзине
-        tovarModel.setCount(basket.stream()
-                .filter(b -> b.getTovar().getId().equals(id))
-                .findFirst()
-                .map(Basket::getQuantity)
-                .orElse(0));
-
-        return tovarModel;
-    }
 }

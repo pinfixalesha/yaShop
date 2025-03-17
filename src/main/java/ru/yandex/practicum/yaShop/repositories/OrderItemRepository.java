@@ -1,13 +1,12 @@
 package ru.yandex.practicum.yaShop.repositories;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import ru.yandex.practicum.yaShop.entities.OrderItem;
 
-import java.util.List;
-
 @Repository
-public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
+public interface OrderItemRepository extends R2dbcRepository<OrderItem, Long> {
 
-    List<OrderItem> findByOrderId(Long orderId);
+    Flux<OrderItem> findByOrderId(Long orderId);
 }

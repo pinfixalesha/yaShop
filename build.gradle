@@ -1,11 +1,11 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.4.2'
+	id 'org.springframework.boot' version '3.4.3'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'ru.yandex.practicum'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.2-SNAPSHOT'
 
 java {
 	toolchain {
@@ -24,18 +24,28 @@ repositories {
 }
 
 dependencies {
+	//Spring
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// Драйвер R2DBC
+	implementation 'io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE'
+	runtimeOnly 'org.postgresql:postgresql'
+
+	// Hibernate Reactive
+	implementation 'org.hibernate.reactive:hibernate-reactive-core:2.0.0.Final'
+
+	// Дополнительные зависимости
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 	implementation 'com.opencsv:opencsv:5.10'
 
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'org.postgresql:postgresql'
-	annotationProcessor 'org.projectlombok:lombok'
-
+	//Тестирование
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.junit.jupiter:junit-jupiter-api'
+	testImplementation 'io.projectreactor:reactor-test'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

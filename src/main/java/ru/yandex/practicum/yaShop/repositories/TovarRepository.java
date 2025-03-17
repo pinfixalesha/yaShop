@@ -1,14 +1,16 @@
 package ru.yandex.practicum.yaShop.repositories;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import ru.yandex.practicum.yaShop.entities.Tovar;
+import org.springframework.data.domain.Sort;
 
 @Repository
-public interface TovarRepository extends JpaRepository<Tovar, Long> {
+public interface TovarRepository extends R2dbcRepository<Tovar, Long> {
 
-    //Метод для получения товаров с фильтрацией по имени, пагинацией и сортировкой.
-    Page<Tovar> findByNameContainingIgnoreCase(String namePart, Pageable pageable);
+   Flux<Tovar> findAllBy(Sort sort, int offset, int limit);
+
+   Flux<Tovar> findByNameContainingIgnoreCase(String namePart, Sort sort, int offset, int limit);
+
 }
