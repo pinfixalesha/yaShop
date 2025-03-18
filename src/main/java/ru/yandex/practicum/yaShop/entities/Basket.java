@@ -18,7 +18,7 @@ public class Basket {
     private Long id;
 
     @Column("tovar_id")
-    private Tovar tovar;
+    private Long tovarId;
 
     @Column("quantity")
     private Integer quantity;

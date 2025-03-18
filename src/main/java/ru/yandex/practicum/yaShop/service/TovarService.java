@@ -1,7 +1,6 @@
 package ru.yandex.practicum.yaShop.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -54,7 +53,7 @@ public class TovarService {
                         .map(tovarModel -> {
                             // Устанавливаем количество товаров в корзине
                             Integer count = basket.stream()
-                                    .filter(b -> b.getTovar().getId().equals(tovarModel.getId()))
+                                    .filter(b -> b.getTovarId().equals(tovarModel.getId()))
                                     .findFirst()
                                     .map(Basket::getQuantity)
                                     .orElse(0);
