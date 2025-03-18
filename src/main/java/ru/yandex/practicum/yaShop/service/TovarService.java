@@ -47,11 +47,10 @@ public class TovarService {
             tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderById(repositorySearch, size, offset);
         }
 
-        return basketFlux.collectList() // Собираем корзину в список
+        return basketFlux.collectList()
                 .flatMapMany(basket -> tovarsFlux
-                        .map(tovarMapper::mapToModel) // Преобразуем товары в DTO
+                        .map(tovarMapper::mapToModel)
                         .map(tovarModel -> {
-                            // Устанавливаем количество товаров в корзине
                             Integer count = basket.stream()
                                     .filter(b -> b.getTovarId().equals(tovarModel.getId()))
                                     .findFirst()
