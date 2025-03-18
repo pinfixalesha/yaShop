@@ -36,7 +36,7 @@ public class TovarService {
                                                            Long customerId) {
         Flux<Basket> basketFlux = basketRepository.findByCustomerId(customerId);
         int offset = page * size;
-        String repositorySearch= Optional.ofNullable(search).orElse("");
+        String repositorySearch = Optional.ofNullable(search).orElse("");
 
         Flux<Tovar> tovarsFlux;
         if (sortType.equalsIgnoreCase("ALPHA")) {
