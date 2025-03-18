@@ -1,8 +1,6 @@
 package ru.yandex.practicum.yaShop.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -14,8 +12,7 @@ import ru.yandex.practicum.yaShop.model.TovarModel;
 import ru.yandex.practicum.yaShop.repositories.BasketRepository;
 import ru.yandex.practicum.yaShop.repositories.TovarRepository;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class TovarService {
@@ -38,22 +35,17 @@ public class TovarService {
                                                            String sortType,
                                                            String search,
                                                            Long customerId) {
-        Sort sort;
-        if (sortType.equalsIgnoreCase("ALPHA")) {
-            sort = Sort.by(Sort.Direction.ASC, "name");
-        } else if (sortType.equalsIgnoreCase("PRICE")) {
-            sort = Sort.by(Sort.Direction.ASC, "price");
-        } else {
-            sort = Sort.by(Sort.Direction.ASC, "id");
-        }
         Flux<Basket> basketFlux = basketRepository.findByCustomerId(customerId);
         int offset = page * size;
+        String repositorySearch= Optional.ofNullable(search).orElse("");
 
         Flux<Tovar> tovarsFlux;
-        if (search == null || search.isEmpty()) {
-            tovarsFlux = tovarRepository.findAllBy(sort, offset, size);
+        if (sortType.equalsIgnoreCase("ALPHA")) {
+            tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderByName(repositorySearch, size, offset);
+        } else if (sortType.equalsIgnoreCase("PRICE")) {
+            tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderByPrice(repositorySearch, size, offset);
         } else {
-            tovarsFlux = tovarRepository.findByNameContainingIgnoreCase(search, sort, offset, size);
+            tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderById(repositorySearch, size, offset);
         }
 
         return basketFlux.collectList() // Собираем корзину в список

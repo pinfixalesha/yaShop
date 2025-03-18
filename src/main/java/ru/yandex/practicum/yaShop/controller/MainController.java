@@ -42,25 +42,21 @@ public class MainController {
             @RequestParam(required = false, name = "pageNumber") Integer pageNumber,
             ServerWebExchange exchange) {
 
-        // Получаем сессию из ServerWebExchange
         return exchange.getSession()
                 .flatMap(session -> {
-                    // Извлекаем PagingPageInfo из сессии или создаем новый объект
+
                     PagingPageInfo paging = session.getAttributeOrDefault("paging", new PagingPageInfo());
 
-                    // Обновляем значения PagingPageInfo
                     paging.setSearch(Optional.ofNullable(search).orElse(paging.getSearch()));
                     paging.setSort(Optional.ofNullable(sort).orElse(paging.getSort()));
                     paging.setPageNumber(Optional.ofNullable(pageNumber).orElse(paging.getPageNumber()));
                     paging.setPageSize(Optional.ofNullable(pageSize).orElse(paging.getPageSize()));
 
-                    // Получаем ID клиента
                     return customerServices.getCustomer()
                             .flatMap(customerId -> {
-                                // Получаем общее количество товаров
+
                                 Mono<Long> totalItemsMono = tovarService.getTotalTovarCount();
 
-                                // Получаем список товаров с пагинацией и сортировкой
                                 Flux<TovarModel> tovarsFlux = tovarService.getTovarsWithPaginationAndSort(
                                         paging.getPageNumber() - 1,
                                         paging.getPageSize(),
@@ -69,20 +65,15 @@ public class MainController {
                                         customerId
                                 );
 
-
-                                // Соединяем данные (товары и общее количество)
+                                // Соединяем данные
                                 return Mono.zip(totalItemsMono, tovarsFlux.collectList())
                                         .flatMap(tuple -> {
                                             Long totalItems = tuple.getT1();
                                             List<TovarModel> tovars = tuple.getT2();
 
-                                            // Обновляем общее количество элементов в PagingPageInfo
                                             paging.setTotalItems(totalItems);
-
-                                            // Сохраняем обновленный PagingPageInfo в сессию
                                             session.getAttributes().put("paging", paging);
 
-                                            session.getAttributes().put("paging", paging);
                                             return session.save()
                                                     .thenReturn(Rendering.view("main")
                                                             .modelAttribute("items", tovars)
