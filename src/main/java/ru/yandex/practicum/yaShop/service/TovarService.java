@@ -11,6 +11,7 @@ import ru.yandex.practicum.yaShop.model.TovarModel;
 import ru.yandex.practicum.yaShop.repositories.BasketRepository;
 import ru.yandex.practicum.yaShop.repositories.TovarRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -62,5 +63,27 @@ public class TovarService {
 
 
     }
+
+
+    public Mono<TovarModel> getTovarById(Long id,Long customerId) {
+
+        Flux<Basket> basketFlux = basketRepository.findByCustomerId(customerId);
+
+        Mono<Tovar> tovarMono = tovarRepository.findById(id);
+
+        return basketFlux.collectList()
+                .flatMap(basket -> tovarMono
+                        .map(tovarMapper::mapToModel)
+                        .map(tovarModel -> {
+                            Integer count = basket.stream()
+                                    .filter(b -> b.getTovarId().equals(tovarModel.getId()))
+                                    .findFirst()
+                                    .map(Basket::getQuantity)
+                                    .orElse(0);
+                            tovarModel.setCount(count);
+                            return tovarModel;
+                        }));
+    }
+
 
 }
