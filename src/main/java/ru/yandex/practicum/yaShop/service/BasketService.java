@@ -7,7 +7,6 @@ import reactor.core.publisher.Mono;
 import ru.yandex.practicum.yaShop.entities.Basket;
 import ru.yandex.practicum.yaShop.entities.Order;
 import ru.yandex.practicum.yaShop.entities.OrderItem;
-import ru.yandex.practicum.yaShop.entities.Tovar;
 import ru.yandex.practicum.yaShop.mapping.BasketMapper;
 import ru.yandex.practicum.yaShop.model.BasketModel;
 import ru.yandex.practicum.yaShop.repositories.BasketRepository;
@@ -19,7 +18,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class BasketService {
@@ -79,20 +77,12 @@ public class BasketService {
     public Flux<BasketModel> getBasketByCustomerId(Long customerId) {
         return basketRepository.findByCustomerId(customerId)
                 .flatMap(basket -> tovarRepository.findById(basket.getTovarId())
-                .map(tovar -> basketMapper.mapToBasketModel(basket,tovar)));
+                    .map(tovar -> basketMapper.mapToBasketModel(basket,tovar)));
     }
 
     private String generateOrderNumber() {
         return "ORDER-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
-
-    private BigDecimal calculateTotalAmount(List<Basket> baskets) {
-        return Flux.fromIterable(baskets)
-                .flatMap(basket -> tovarRepository.findById(basket.getTovarId())
-                        .map(tovar -> tovar.getPrice().multiply(BigDecimal.valueOf(basket.getQuantity()))))
-                .reduce(BigDecimal.ZERO, BigDecimal::add).block();
-    }
-
 
     public Mono<Long> buy(Long customerId) {
         return basketRepository.findByCustomerId(customerId)
