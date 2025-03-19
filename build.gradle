@@ -31,7 +31,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 	// Драйвер R2DBC
-	implementation 'io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE'
+	runtimeOnly 'io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE'
 	runtimeOnly 'org.postgresql:postgresql'
 
 	// Hibernate Reactive
@@ -44,10 +44,8 @@ dependencies {
 
 	//Тестирование
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.junit.jupiter:junit-jupiter-api'
 	testImplementation 'io.projectreactor:reactor-test'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'org.mockito:mockito-core'
 }
 
 tasks.named('test') {
