@@ -19,10 +19,10 @@ public class OrderItem {
     private Long id;
 
     @Column("order_id")
-    private Order order;
+    private Long orderId;
 
     @Column("tovar_id")
-    private Tovar tovar;
+    private Long tovarId;
 
     @Column("quantity")
     private Integer quantity;
