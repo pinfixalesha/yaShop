@@ -86,6 +86,10 @@ docker ps
 
 Приложение будет доступно по адресу: http://localhost:8080
 
+## Миграция таблиц БД PostgreSQL
+
+В проекте используется Liquibase для управления миграциями базы данных.
+[db.changelog-master.yaml](src%2Fmain%2Fresources%2Fdb%2Fchangelog%2Fdb.changelog-master.yaml)
 
 ## Загрузка товаров в базу данных PostgreSQL
 
