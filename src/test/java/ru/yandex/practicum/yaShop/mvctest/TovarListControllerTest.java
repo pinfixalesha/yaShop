@@ -4,26 +4,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import ru.yandex.practicum.yaShop.YaShopApplication;
-import ru.yandex.practicum.yaShop.controller.TovarController;
 import ru.yandex.practicum.yaShop.entities.Tovar;
-import ru.yandex.practicum.yaShop.mapping.BasketMapper;
 import ru.yandex.practicum.yaShop.repositories.BasketRepository;
 import ru.yandex.practicum.yaShop.repositories.OrderItemRepository;
 import ru.yandex.practicum.yaShop.repositories.OrderRepository;
 import ru.yandex.practicum.yaShop.repositories.TovarRepository;
-import ru.yandex.practicum.yaShop.service.BasketService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @SpringBootTest(classes = YaShopApplication.class)
 @TestPropertySource(locations = "classpath:application.properties")
@@ -75,9 +71,9 @@ public class TovarListControllerTest {
                 .expectBody(String.class)
                 .value(body -> {
                     for (int i = 1; i <= 10; i++) {
-                        org.hamcrest.MatcherAssert.assertThat(body, containsString("Title " + i));
+                        assertThat(body, containsString("Title " + i));
                     }
-                    org.hamcrest.MatcherAssert.assertThat(body, containsString("Страница: 1"));
+                    assertThat(body, containsString("Страница: 1"));
                 });
     }
 
