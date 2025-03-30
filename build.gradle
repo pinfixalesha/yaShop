@@ -2,10 +2,11 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.3'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.liquibase.gradle' version '2.2.0'
 }
 
 group = 'ru.yandex.practicum'
-version = '0.0.2-SNAPSHOT'
+version = '0.0.3-SNAPSHOT'
 
 java {
 	toolchain {
@@ -30,9 +31,16 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+	//Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+
+	// Liquibase для миграций
+	liquibaseRuntime 'org.liquibase:liquibase-core'
+	liquibaseRuntime 'org.postgresql:postgresql'
+	liquibaseRuntime 'info.picocli:picocli:4.6.3'
+
 	// Драйвер R2DBC
 	runtimeOnly 'io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE'
-	runtimeOnly 'org.postgresql:postgresql'
 
 	// Hibernate Reactive
 	implementation 'org.hibernate.reactive:hibernate-reactive-core:2.0.0.Final'
@@ -46,6 +54,20 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'org.mockito:mockito-core'
+}
+
+liquibase {
+	activities {
+		main {
+			File propsFile = new File("${project.rootDir}/src/main/resources/liquibase.properties")
+			Properties properties = new Properties()
+			properties.load(new FileInputStream(propsFile))
+			changelogFile properties['changelogFile']
+			url properties['url']
+			username properties['username']
+			password properties['password']
+		}
+	}
 }
 
 tasks.named('test') {

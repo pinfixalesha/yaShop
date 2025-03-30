@@ -14,4 +14,5 @@ public interface BasketRepository  extends R2dbcRepository<Basket, Long> {
     Flux<Basket> findByCustomerId(Long customerId);
 
     Mono<Void> deleteAllByCustomerId(Long customerId);
+
 }

@@ -5,7 +5,6 @@ import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import ru.yandex.practicum.yaShop.entities.Tovar;
-import org.springframework.data.domain.Sort;
 
 @Repository
 public interface TovarRepository extends R2dbcRepository<Tovar, Long> {

@@ -26,8 +26,15 @@ public class TovarService {
     @Autowired
     private BasketRepository basketRepository;
 
+    @Autowired
+    private TovarRedisCacheService tovarRedisCacheService;
+
     public Mono<Long> getTotalTovarCount() {
-        return tovarRepository.count();
+        return tovarRedisCacheService.getCachedTotalTovarCount()
+            .switchIfEmpty(
+                tovarRepository.count()
+                        .doOnSuccess(count -> tovarRedisCacheService.cacheTotalTovarCount(count).subscribe())
+            );
     }
 
     public Flux<TovarModel> getTovarsWithPaginationAndSort(int page,
@@ -69,7 +76,9 @@ public class TovarService {
 
         Flux<Basket> basketFlux = basketRepository.findByCustomerId(customerId);
 
-        Mono<Tovar> tovarMono = tovarRepository.findById(id);
+        Mono<Tovar> tovarMono = tovarRedisCacheService.getCachedTovar(id)
+                .switchIfEmpty(tovarRepository.findById(id)
+                        .doOnSuccess(tovar -> tovarRedisCacheService.cacheTovar(tovar).subscribe()));
 
         return basketFlux.collectList()
                 .flatMap(basket -> tovarMono

@@ -1,7 +1,7 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/tables/tovars.yaml
+      file: src/main/resources/db/changelog/tables/tovars.yaml
   - include:
-      file: db/changelog/tables/basket.yaml
+      file: src/main/resources/db/changelog/tables/basket.yaml
   - include:
-      file: db/changelog/tables/orders.yaml
+      file: src/main/resources/db/changelog/tables/orders.yaml

@@ -61,13 +61,13 @@
 git clone https://github.com/pinfixalesha/yaShop.git 
 ```
 
-### Развертывание PostgreSQL в Docker
+### Развертывание PostgreSQL и Redis в Docker
 
-1. Выполните следующую команду для запуска PostgreSQL
+1. Выполните следующую команду для запуска PostgreSQL и Redis
 ```bash
 docker-compose up -d 
 ```
-2. Проверка работы PostgreSQL
+2. Проверка работы PostgreSQL, Redis
 ```bash
 docker ps 
 ```
@@ -75,13 +75,17 @@ docker ps
 
 ## Запуск приложения
 
-1. Соберите приложение с помощью Gradle:
+1. Выполните миграцию БД
    ```bash
-   gradle build
+   ./gradlew update --warning-mode all
    ```
-2. Запустите приложение:
+2. Соберите приложение с помощью Gradle:
    ```bash
-   java -jar build/libs/yaShop-0.0.1-SNAPSHOT.jar
+   ./gradle build
+   ```
+4. Запустите приложение:
+   ```bash
+   java -jar build/libs/yaShop-0.0.3-SNAPSHOT.jar
    ```
 
 Приложение будет доступно по адресу: http://localhost:8080
