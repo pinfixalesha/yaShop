@@ -17,6 +17,9 @@ import java.util.Optional;
 @Service
 public class TovarService {
 
+    private static final String SORT_TYPE_ALPHA = "ALPHA";
+    private static final String SORT_TYPE_PRICE = "PRICE";
+
     @Autowired
     private TovarRepository tovarRepository;
 
@@ -31,10 +34,10 @@ public class TovarService {
 
     public Mono<Long> getTotalTovarCount() {
         return tovarRedisCacheService.getCachedTotalTovarCount()
-            .switchIfEmpty(
-                tovarRepository.count()
-                        .doOnSuccess(count -> tovarRedisCacheService.cacheTotalTovarCount(count).subscribe())
-            );
+                .switchIfEmpty(
+                        tovarRepository.count()
+                                .doOnSuccess(count -> tovarRedisCacheService.cacheTotalTovarCount(count).subscribe())
+                );
     }
 
     public Flux<TovarModel> getTovarsWithPaginationAndSort(int page,
@@ -46,14 +49,7 @@ public class TovarService {
         int offset = page * size;
         String repositorySearch = Optional.ofNullable(search).orElse("");
 
-        Flux<Tovar> tovarsFlux;
-        if (sortType.equalsIgnoreCase("ALPHA")) {
-            tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderByName(repositorySearch, size, offset);
-        } else if (sortType.equalsIgnoreCase("PRICE")) {
-            tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderByPrice(repositorySearch, size, offset);
-        } else {
-            tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderById(repositorySearch, size, offset);
-        }
+        Flux<Tovar> tovarsFlux = getTovarListWithCache(sortType, repositorySearch, size, offset);
 
         return basketFlux.collectList()
                 .flatMapMany(basket -> tovarsFlux
@@ -71,8 +67,33 @@ public class TovarService {
 
     }
 
+    public Mono<Tovar> getTovarByIdWithCache(Long id) {
+        return tovarRedisCacheService.getCachedTovar(id)
+                .switchIfEmpty(tovarRepository.findById(id)
+                        .doOnSuccess(tovar -> tovarRedisCacheService.cacheTovar(tovar).subscribe()));
+    }
 
-    public Mono<TovarModel> getTovarById(Long id,Long customerId) {
+    public Flux<Tovar> getTovarListWithCache(String sortType, String namePart, int limit, int offset) {
+        return tovarRedisCacheService.getCachedListTovar(sortType, namePart, limit, offset)
+                .switchIfEmpty(Flux.defer(() -> {
+                    Flux<Tovar> tovarsFlux;
+                    if (sortType.equalsIgnoreCase(SORT_TYPE_ALPHA)) {
+                        tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderByName(namePart, limit, offset);
+                    } else if (sortType.equalsIgnoreCase(SORT_TYPE_PRICE)) {
+                        tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderByPrice(namePart, limit, offset);
+                    } else {
+                        tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderById(namePart, limit, offset);
+                    }
+
+                    return tovarsFlux.collectList()
+                            .doOnNext(tovars ->
+                                    tovarRedisCacheService.cacheListTovar(sortType, namePart, limit, offset, tovars).subscribe()
+                            )
+                            .flatMapMany(Flux::fromIterable);
+                }));
+    }
+
+    public Mono<TovarModel> getTovarById(Long id, Long customerId) {
 
         Flux<Basket> basketFlux = basketRepository.findByCustomerId(customerId);
 
@@ -90,12 +111,6 @@ public class TovarService {
                             tovarModel.setCount(count);
                             return tovarModel;
                         }));
-    }
-
-    public Mono<Tovar> getTovarByIdWithCache(Long id) {
-        return tovarRedisCacheService.getCachedTovar(id)
-                .switchIfEmpty(tovarRepository.findById(id)
-                        .doOnSuccess(tovar -> tovarRedisCacheService.cacheTovar(tovar).subscribe()));
     }
 
 }
