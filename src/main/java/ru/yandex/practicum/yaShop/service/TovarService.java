@@ -76,9 +76,7 @@ public class TovarService {
 
         Flux<Basket> basketFlux = basketRepository.findByCustomerId(customerId);
 
-        Mono<Tovar> tovarMono = tovarRedisCacheService.getCachedTovar(id)
-                .switchIfEmpty(tovarRepository.findById(id)
-                        .doOnSuccess(tovar -> tovarRedisCacheService.cacheTovar(tovar).subscribe()));
+        Mono<Tovar> tovarMono = getTovarByIdWithCache(id);
 
         return basketFlux.collectList()
                 .flatMap(basket -> tovarMono
@@ -94,5 +92,10 @@ public class TovarService {
                         }));
     }
 
+    public Mono<Tovar> getTovarByIdWithCache(Long id) {
+        return tovarRedisCacheService.getCachedTovar(id)
+                .switchIfEmpty(tovarRepository.findById(id)
+                        .doOnSuccess(tovar -> tovarRedisCacheService.cacheTovar(tovar).subscribe()));
+    }
 
 }

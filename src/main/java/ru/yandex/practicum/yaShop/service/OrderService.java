@@ -10,9 +10,6 @@ import ru.yandex.practicum.yaShop.repositories.OrderItemRepository;
 import ru.yandex.practicum.yaShop.repositories.OrderRepository;
 import ru.yandex.practicum.yaShop.repositories.TovarRepository;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 public class OrderService {
 
@@ -28,10 +25,14 @@ public class OrderService {
     @Autowired
     private TovarRepository tovarRepository;
 
+    @Autowired
+    private TovarService tovarService;
+
+
     public Mono<OrderModel> getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
                 .flatMap(order -> orderItemRepository.findByOrderId(order.getId())
-                        .flatMap(orderItem -> tovarRepository.findById(orderItem.getTovarId())
+                        .flatMap(orderItem -> tovarService.getTovarByIdWithCache(orderItem.getTovarId())
                                 .map(tovar -> orderMapper.mapToOrderItemModel(orderItem, tovar)))
                         .collectList()
                         .map(orderItemModels -> {

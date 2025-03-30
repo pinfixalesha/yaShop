@@ -37,6 +37,8 @@ public class BasketService {
     @Autowired
     private OrderItemRepository orderItemRepository;
 
+    @Autowired
+    private TovarService tovarService;
 
     public Mono<Void> addToBasket(Long tovarId, Long customerId) {
         Mono<Basket> basketMono = basketRepository
@@ -76,7 +78,7 @@ public class BasketService {
 
     public Flux<BasketModel> getBasketByCustomerId(Long customerId) {
         return basketRepository.findByCustomerId(customerId)
-                .flatMap(basket -> tovarRepository.findById(basket.getTovarId())
+                .flatMap(basket -> tovarService.getTovarByIdWithCache(basket.getTovarId())
                     .map(tovar -> basketMapper.mapToBasketModel(basket,tovar)));
     }
 
@@ -104,7 +106,7 @@ public class BasketService {
                             .flatMap(savedOrder -> {
 
                                 List<Mono<OrderItem>> orderItemMonos = baskets.stream()
-                                        .map(basket -> tovarRepository.findById(basket.getTovarId())
+                                        .map(basket -> tovarService.getTovarByIdWithCache(basket.getTovarId())
                                                 .map(tovar -> {
                                                     OrderItem orderItem = new OrderItem();
                                                     orderItem.setTovarId(basket.getTovarId());
