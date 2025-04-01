@@ -1,1 +1,5 @@
 rootProject.name = 'yaShop'
+include 'payment-service'
+include 'web-app'
+include 'liquibase-config'
+

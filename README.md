@@ -12,9 +12,10 @@
 2. **Фреймворк**: Spring Boot + WebFlux
 3. **Система сборки**: Gradle
 4. **База данных**: Персистентная (PostgreSQL)
-5. **Веб-сервер**: Netty
-6. **Тестирование**: JUnit 5, TestContext Framework, Spring Boot Test
-7. **Контейнеризация**: Docker
+5. **Кэш**: Redis
+6. **Веб-сервер**: Netty
+7. **Тестирование**: JUnit 5, TestContext Framework, Spring Boot Test
+8. **Контейнеризация**: Docker
 
 ---
 
@@ -81,7 +82,7 @@ docker ps
    ```
 2. Соберите приложение с помощью Gradle:
    ```bash
-   ./gradle build
+   gradle build
    ```
 4. Запустите приложение:
    ```bash
