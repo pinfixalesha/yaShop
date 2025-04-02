@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id "org.openapi.generator" version "7.12.0"
 }
 
 java {
@@ -17,20 +18,70 @@ configurations {
 }
 
 dependencies {
+    //Spring
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // Swagger/OpenAPI
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+    implementation 'org.hibernate.validator:hibernate-validator:8.0.0.Final'
+
+    //Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+
+    // Драйвер R2DBC
+    runtimeOnly 'io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE'
+
+    // Hibernate Reactive
+    implementation 'org.hibernate.reactive:hibernate-reactive-core:2.0.0.Final'
+
+    // Дополнительные зависимости
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
     implementation 'com.opencsv:opencsv:5.10'
 
-    compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'org.postgresql:postgresql'
-    annotationProcessor 'org.projectlombok:lombok'
-
+    //Тестирование
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.mockito:mockito-core'
+}
+
+openApiGenerate {
+    generatorName.set("spring")
+    inputSpec.set("${project.projectDir}/src/main/resources/openapi.yaml")
+    outputDir.set("${project.projectDir}/build/generated")
+    modelPackage.set("ru.yandex.practicum.yaPayment.dto")
+    apiPackage.set("ru.yandex.practicum.yaPayment.api")
+    configOptions.set([
+            sourceFolder: "src/main/java",
+            interfaceOnly: "true",
+            library: "spring-boot",
+            reactive: "true",
+            useTags: "true",
+            useSpringController: "true",  // javax.* to jakarta.*
+            useSpringBoot3: "true",
+            useSpringfox: "false",
+            openApiNullable: "false"     //Убираем org.openapitools.jackson.nullable.JsonNullable;
+    ])
+}
+
+
+sourceSets {
+    main {
+        java {
+            srcDirs += 'build/generated/src/main/java'
+        }
+    }
+}
+
+tasks.compileJava {
+    dependsOn 'openApiGenerate'
+}
+
+tasks.build {
+    dependsOn 'openApiGenerate'
 }
 
 tasks.named('test') {

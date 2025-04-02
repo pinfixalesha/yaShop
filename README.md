@@ -84,9 +84,13 @@ docker ps
    ```bash
    gradle build
    ```
-4. Запустите приложение:
+4. Запустите платежный сервис приложение:
    ```bash
-   java -jar build/libs/yaShop-0.0.3-SNAPSHOT.jar
+   java -jar payment-service/build/libs/web-app-0.0.3-SNAPSHOT.jar
+   ```
+5. Запустите web приложение:
+   ```bash
+   java -jar web-app/build/libs/web-app-0.0.3-SNAPSHOT.jar
    ```
 
 Приложение будет доступно по адресу: http://localhost:8080

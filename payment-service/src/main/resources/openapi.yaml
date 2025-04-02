@@ -1,0 +1,91 @@
+openapi: 3.0.3
+info:
+  title: Payment Service API
+  version: 1.0.0
+  description: API для управления платежами и балансом магазина yaShop.
+  contact:
+    name: Пиняев Алексей Васильевич
+    email: aleshap@mail.ru
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: http://localhost:8181
+    description: Платежный сервер
+paths:
+  /balance/{userId}:
+    get:
+      tags:
+        - Balance
+      summary: Получение текущего баланса пользователя
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 123
+          description: Идентификатор пользователя
+      responses:
+        '200':
+          description: Успешное получение баланса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+  /payment/{userId}:
+    post:
+      tags:
+        - Payment
+      summary: Осуществление платежа
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 123
+          description: Идентификатор пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '200':
+          description: Платеж успешно выполнен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          description: Недостаточно средств на балансе
+components:
+  schemas:
+    BalanceResponse:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: double
+          description: Баланс пользователя
+          example: 500.45
+    PaymentRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+          description: Сумма покупки
+    PaymentResponse:
+      type: object
+      properties:
+        error:
+          type: boolean
+          description: Ошибка операции
+          example: false
+        message:
+          type: string
+          description: Сообщение об операции
+          example: Операция прошла успешно
