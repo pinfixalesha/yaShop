@@ -1,0 +1,54 @@
+databaseChangeLog:
+  - changeSet:
+      id: yaShop users table
+      author: Pinayev Aleksey
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: customer_id
+                  type: bigint
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: balance
+                  type: decimal(19, 2)
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: yaShop users index customer
+      author: Pinayev Aleksey
+      changes:
+        - createIndex:
+            tableName: users
+            indexName: idx_customer_id
+            columns:
+              - column:
+                  name: customer_id
+
+  - changeSet:
+      id: yaShop users data
+      author: Pinayev Aleksey
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 1
+              - column:
+                  name: customer_id
+                  valueNumeric: 1
+              - column:
+                  name: balance
+                  valueNumeric: 100000
+

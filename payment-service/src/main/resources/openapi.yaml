@@ -33,6 +33,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BalanceResponse'
+        '404':
+          description: Покупатель не найден
   /payment/{userId}:
     post:
       tags:
@@ -44,6 +46,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
             example: 123
           description: Идентификатор пользователя
       requestBody:
@@ -61,6 +64,8 @@ paths:
                 $ref: '#/components/schemas/PaymentResponse'
         '400':
           description: Недостаточно средств на балансе
+        '404':
+          description: Покупатель не найден
 components:
   schemas:
     BalanceResponse:

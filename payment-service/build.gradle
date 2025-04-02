@@ -48,6 +48,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core'
 }
 
+//Генерации серверной части на реактивном стеке OpenAPI, и используем его в проекте
 openApiGenerate {
     generatorName.set("spring")
     inputSpec.set("${project.projectDir}/src/main/resources/openapi.yaml")
