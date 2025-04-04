@@ -17,7 +17,7 @@ public class BalanceController implements BalanceApi {
     private BalanceService balanceService;
 
     @Override
-    public Mono<ResponseEntity<BalanceResponse>> balanceUserIdGet(Integer userId,final ServerWebExchange exchange) {
+    public Mono<ResponseEntity<BalanceResponse>> balanceUserIdGet(Long userId,final ServerWebExchange exchange) {
         return balanceService.getBalance(userId)
                 .map(ResponseEntity::ok)
                 .onErrorResume(UserNotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()));

@@ -13,8 +13,8 @@ public class BalanceService {
     @Autowired
     private UserRepository userRepository;
 
-    public Mono<BalanceResponse> getBalance(Integer userId) {
-        return userRepository.findByCustomerId(Long.valueOf(userId))
+    public Mono<BalanceResponse> getBalance(Long userId) {
+        return userRepository.findByCustomerId(userId)
                 .next()
                 .map(user -> new BalanceResponse().balance(user.getBalance().doubleValue()))
                 .switchIfEmpty(Mono.error(new UserNotFoundException(userId)));

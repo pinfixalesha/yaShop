@@ -2,11 +2,7 @@ package ru.yandex.practicum.yaPayment.exceptions;
 
 public class UserNotFoundException extends RuntimeException {
 
-    public UserNotFoundException(String message) {
-        super(message);
-    }
-
-    public UserNotFoundException(Integer userId) {
+    public UserNotFoundException(Long userId) {
         super("User " + userId + " not found");
     }
 }
