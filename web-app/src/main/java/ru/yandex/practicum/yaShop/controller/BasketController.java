@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
 import ru.yandex.practicum.yaShop.model.BasketModel;
 import ru.yandex.practicum.yaShop.service.BasketService;
 import ru.yandex.practicum.yaShop.service.CustomerServices;
+import ru.yandex.practicum.yaShop.service.PaymentClientService;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,16 +30,22 @@ public class BasketController {
     @Autowired
     private CustomerServices customerServices;
 
+    @Autowired
+    private PaymentClientService paymentClientService;
+
+
     @GetMapping
     public Mono<Rendering> getBasket() {
-        return customerServices.getCustomer()
-                .flatMapMany(customerId -> basketService.getBasketByCustomerId(customerId))
-                .collectList()
-                .map(basketModels -> Rendering.view("cart")
-                        .modelAttribute("items", basketModels)
-                        .modelAttribute("total", calculateTotalAmount(basketModels))
-                        .modelAttribute("empty", basketModels.size()==0?true:false)
-                        .build());
+        return paymentClientService.checkHealth()
+                .flatMap(paymentHealthResponse -> customerServices.getCustomer()
+                    .flatMapMany(customerId -> basketService.getBasketByCustomerId(customerId))
+                    .collectList()
+                    .map(basketModels -> Rendering.view("cart")
+                            .modelAttribute("items", basketModels)
+                            .modelAttribute("total", calculateTotalAmount(basketModels))
+                            .modelAttribute("empty", basketModels.size()==0?true:false)
+                            .modelAttribute("paymentServiceAvailable", paymentHealthResponse.getStatus().equals("UP"))
+                            .build()));
     }
 
     public BigDecimal calculateTotalAmount(List<BasketModel> basketModels) {

@@ -51,9 +51,16 @@
     </tr>
     <tr>
         <td style="text-align:right">
-            <form action="/buy" method="post" th:if="${!empty}">
-                <button>Купить</button>
-            </form>
+            <!-- Кнопка "Купить" -->
+            <div th:if="${paymentServiceAvailable}">
+                <form action="/buy" method="post" th:if="${!empty}">
+                    <button>Купить</button>
+                </form>
+            </div>
+            <!-- Сообщение о недоступности сервиса -->
+            <div th:if="${!paymentServiceAvailable}" style="color:red;">
+                Сервис платежей временно недоступен. Покупка невозможна.
+            </div>
         </td>
     </tr>
 </table>
