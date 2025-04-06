@@ -51,15 +51,27 @@
     </tr>
     <tr>
         <td style="text-align:right">
+            <!-- Отображение баланса -->
+            <div th:if="${balance != null}">
+                <b th:text="'Баланс покупателя: ' + ${balance.balance} + ' руб.'"></b>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align:right">
             <!-- Кнопка "Купить" -->
-            <div th:if="${paymentServiceAvailable}">
+            <div th:if="${canBuy}">
                 <form action="/buy" method="post" th:if="${!empty}">
                     <button>Купить</button>
                 </form>
             </div>
             <!-- Сообщение о недоступности сервиса -->
-            <div th:if="${!paymentServiceAvailable}" style="color:red;">
+            <div th:if="${paymentNotAvailable}" style="color:red;">
                 Сервис платежей временно недоступен. Покупка невозможна.
+            </div>
+            <!-- Сообщение о недостаточности средств -->
+            <div th:if="${noMoney}" style="color:red;">
+                У покупателя недостаточно средств для совершения покупки. Покупка невозможна.
             </div>
         </td>
     </tr>

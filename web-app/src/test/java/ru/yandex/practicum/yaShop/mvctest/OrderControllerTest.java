@@ -6,10 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockReset;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.yaShop.YaShopApplication;
+import ru.yandex.practicum.yaShop.dto.PaymentResponse;
 import ru.yandex.practicum.yaShop.entities.Basket;
 import ru.yandex.practicum.yaShop.entities.Order;
 import ru.yandex.practicum.yaShop.entities.Tovar;
@@ -18,6 +22,7 @@ import ru.yandex.practicum.yaShop.repositories.OrderItemRepository;
 import ru.yandex.practicum.yaShop.repositories.OrderRepository;
 import ru.yandex.practicum.yaShop.repositories.TovarRepository;
 import ru.yandex.practicum.yaShop.service.CustomerServices;
+import ru.yandex.practicum.yaShop.service.PaymentClientService;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,6 +31,9 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = YaShopApplication.class)
 @TestPropertySource(locations = "classpath:application.properties")
@@ -50,6 +58,9 @@ public class OrderControllerTest {
     @Autowired
     private CustomerServices customerServices;
 
+    @MockitoBean(reset = MockReset.BEFORE)
+    private PaymentClientService paymentClientService;
+
     private Long tovarId;
 
     @BeforeEach
@@ -72,6 +83,11 @@ public class OrderControllerTest {
 
     @Test
     void buyOrder() {
+        when(paymentClientService.processPayment(anyLong(),any()))
+                .thenReturn(Mono.just(new PaymentResponse()
+                        .error(false)
+                        .message("Оплата удалась")));
+
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("action", "plus");
 

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.reactive.result.view.Rendering;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.yaShop.dto.BalanceResponse;
+import ru.yandex.practicum.yaShop.dto.PaymentHealthResponse;
 import ru.yandex.practicum.yaShop.model.BasketModel;
 import ru.yandex.practicum.yaShop.service.BasketService;
 import ru.yandex.practicum.yaShop.service.CustomerServices;
@@ -36,22 +38,40 @@ public class BasketController {
 
     @GetMapping
     public Mono<Rendering> getBasket() {
-        return paymentClientService.checkHealth()
-                .flatMap(paymentHealthResponse -> customerServices.getCustomer()
-                    .flatMapMany(customerId -> basketService.getBasketByCustomerId(customerId))
-                    .collectList()
-                    .map(basketModels -> Rendering.view("cart")
-                            .modelAttribute("items", basketModels)
-                            .modelAttribute("total", calculateTotalAmount(basketModels))
-                            .modelAttribute("empty", basketModels.size()==0?true:false)
-                            .modelAttribute("paymentServiceAvailable", paymentHealthResponse.getStatus().equals("UP"))
-                            .build()));
-    }
+        return customerServices.getCustomer()
+            .flatMap(customerId -> {
+                //баланс
+                Mono<BalanceResponse> balanceMono = paymentClientService.getBalance(customerId);
+                // статус сервиса
+                Mono<PaymentHealthResponse> paymentHealthMono = paymentClientService.checkHealth();
+                // Корзина
+                Mono<List<BasketModel>> basketModelsMono = basketService.getBasketByCustomerId(customerId)
+                        .collectList();
+                return Mono.zip(balanceMono, paymentHealthMono, basketModelsMono)
+                        .map(tuple -> {
+                            BalanceResponse balance = tuple.getT1();
+                            PaymentHealthResponse paymentHealth = tuple.getT2();
+                            List<BasketModel> basketModels = tuple.getT3();
+                            BigDecimal total=basketService.calculateTotalAmount(basketModels);
 
-    public BigDecimal calculateTotalAmount(List<BasketModel> basketModels) {
-        return basketModels.stream()
-                .map(basketModel -> basketModel.getPrice().multiply(BigDecimal.valueOf(basketModel.getCount())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                            boolean paymentNotAvailable = !("UP".equals(paymentHealth.getStatus()));
+                            boolean noMoney= (total.compareTo(new BigDecimal(balance.getBalance()))>0);
+                            if (paymentNotAvailable) {
+                                balance=null;
+                            }
+                            boolean canBuy=!(paymentNotAvailable||noMoney);
+
+                            return Rendering.view("cart")
+                                    .modelAttribute("items", basketModels)
+                                    .modelAttribute("total", total)
+                                    .modelAttribute("empty", basketModels.isEmpty())
+                                    .modelAttribute("paymentNotAvailable", paymentNotAvailable)
+                                    .modelAttribute("noMoney", noMoney)
+                                    .modelAttribute("canBuy", canBuy)
+                                    .modelAttribute("balance", balance)
+                                    .build();
+                        });
+            });
     }
 
     @PostMapping(value = "/{id}")

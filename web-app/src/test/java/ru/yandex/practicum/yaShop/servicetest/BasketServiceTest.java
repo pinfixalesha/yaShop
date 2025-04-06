@@ -8,6 +8,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.yaShop.YaShopApplication;
+import ru.yandex.practicum.yaShop.dto.PaymentResponse;
 import ru.yandex.practicum.yaShop.entities.Basket;
 import ru.yandex.practicum.yaShop.entities.Tovar;
 import ru.yandex.practicum.yaShop.entities.Order;
@@ -16,6 +17,7 @@ import ru.yandex.practicum.yaShop.repositories.OrderItemRepository;
 import ru.yandex.practicum.yaShop.repositories.OrderRepository;
 import ru.yandex.practicum.yaShop.repositories.TovarRepository;
 import ru.yandex.practicum.yaShop.service.BasketService;
+import ru.yandex.practicum.yaShop.service.PaymentClientService;
 import ru.yandex.practicum.yaShop.service.TovarRedisCacheService;
 
 import java.math.BigDecimal;
@@ -44,6 +46,8 @@ public class BasketServiceTest {
     @MockitoBean(reset = MockReset.BEFORE)
     private OrderItemRepository orderItemRepository;
 
+    @MockitoBean(reset = MockReset.BEFORE)
+    private PaymentClientService paymentClientService;
 
     @Autowired
     private BasketService basketService;
@@ -86,6 +90,7 @@ public class BasketServiceTest {
 
     @Test
     void testBuy() {
+
         Long customerId = 1L;
 
         Tovar tovar1 = new Tovar(1L, "Test Title 1", "base64", "Description 1", new BigDecimal("1000.00"));
@@ -107,6 +112,10 @@ public class BasketServiceTest {
         when(tovarRedisCacheService.cacheTovar(tovar1)).thenReturn(Mono.just(true));
         when(tovarRedisCacheService.getCachedTovar(anyLong())).thenReturn(Mono.empty());
         when(tovarRedisCacheService.cacheTovar(tovar2)).thenReturn(Mono.just(true));
+        when(paymentClientService.processPayment(anyLong(),any()))
+                .thenReturn(Mono.just(new PaymentResponse()
+                        .error(false)
+                        .message("Оплата удалась")));
 
 
         Mono<Long> orderIdMono = basketService.buy(customerId);

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.yaShop.dto.PaymentRequest;
 import ru.yandex.practicum.yaShop.entities.Basket;
 import ru.yandex.practicum.yaShop.entities.Order;
 import ru.yandex.practicum.yaShop.entities.OrderItem;
@@ -39,6 +40,9 @@ public class BasketService {
 
     @Autowired
     private TovarService tovarService;
+
+    @Autowired
+    private PaymentClientService paymentClientService;
 
     public Mono<Void> addToBasket(Long tovarId, Long customerId) {
         Mono<Basket> basketMono = basketRepository
@@ -86,52 +90,64 @@ public class BasketService {
         return "ORDER-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
-    public Mono<Long> buy(Long customerId) {
-        return basketRepository.findByCustomerId(customerId)
-                .collectList() // Преобразуем Flux<Basket> в Mono<List<Basket>>
-                .flatMap(baskets -> {
-                    if (baskets.isEmpty()) {
-                        return Mono.error(new IllegalArgumentException("Корзина пуста."));
-                    }
-
-                    // Создаем новый заказ
-                    Order order = new Order();
-                    order.setCustomerId(customerId);
-                    order.setOrderDate(LocalDateTime.now());
-                    order.setOrderNumber(generateOrderNumber());
-                    order.setTotalAmount(BigDecimal.ZERO);
-
-                    // Сохраняем заказ
-                    return orderRepository.save(order)
-                            .flatMap(savedOrder -> {
-
-                                List<Mono<OrderItem>> orderItemMonos = baskets.stream()
-                                        .map(basket -> tovarService.getTovarByIdWithCache(basket.getTovarId())
-                                                .map(tovar -> {
-                                                    OrderItem orderItem = new OrderItem();
-                                                    orderItem.setTovarId(basket.getTovarId());
-                                                    orderItem.setOrderId(savedOrder.getId());
-                                                    orderItem.setQuantity(basket.getQuantity());
-                                                    orderItem.setPrice(tovar.getPrice());
-
-                                                    order.setTotalAmount(order.getTotalAmount()
-                                                            .add(tovar.getPrice()
-                                                                    .multiply(BigDecimal.valueOf(basket.getQuantity()))));
-                                                    return orderItem;
-                                                }))
-                                        .toList();
-
-                                //Сначала сохраним табличную часть для расчета TotalAmount
-                                return Flux.concat(orderItemMonos)
-                                        .collectList()
-                                        .flatMap(orderItemsSave -> orderItemRepository.saveAll(orderItemsSave)
-                                                .then(orderRepository.save(order)
-                                                        .map(savedOrderLast -> savedOrderLast.getId())));
-                            })
-                            .flatMap(orderId ->basketRepository.deleteAllByCustomerId(customerId)
-                                    .then(Mono.just(orderId)));
-                });
+    public BigDecimal calculateTotalAmount(List<BasketModel> basketModels) {
+        return basketModels.stream()
+                .map(basketModel -> basketModel.getPrice().multiply(BigDecimal.valueOf(basketModel.getCount())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    public Mono<Long> buy(Long customerId) {
+        return getBasketByCustomerId(customerId)
+            .collectList()
+            .flatMap(basketModels -> {
+               if (basketModels.size()==0) {
+                    return Mono.error(new IllegalArgumentException("Корзина пуста."));
+               }
+
+               BigDecimal totalAmount=calculateTotalAmount(basketModels);
+
+               PaymentRequest paymentRequest = new PaymentRequest();
+               paymentRequest.setAmount(totalAmount.doubleValue());
+
+                return paymentClientService.processPayment(customerId, paymentRequest)
+                    .flatMap(paymentResponse -> {
+                        if (paymentResponse.getError()) {
+                            return Mono.error(new IllegalArgumentException(paymentResponse.getMessage()));
+                        }
+
+                        // Создаем новый заказ
+                        Order order = new Order();
+                        order.setCustomerId(customerId);
+                        order.setOrderDate(LocalDateTime.now());
+                        order.setOrderNumber(generateOrderNumber());
+                        order.setTotalAmount(totalAmount);
+
+                        return orderRepository.save(order)
+                                .flatMap(savedOrder -> {
+
+                                    List<Mono<OrderItem>> orderItemMonos = basketModels.stream()
+                                            .map(basket -> tovarService.getTovarByIdWithCache(basket.getTovarId())
+                                                    .map(tovar -> {
+                                                        OrderItem orderItem = new OrderItem();
+                                                        orderItem.setTovarId(basket.getTovarId());
+                                                        orderItem.setOrderId(savedOrder.getId());
+                                                        orderItem.setQuantity(basket.getCount());
+                                                        orderItem.setPrice(tovar.getPrice());
+                                                        return orderItem;
+                                                    }))
+                                            .toList();
+
+                                    //Сначала сохраним табличную часть для расчета TotalAmount
+                                    return Flux.concat(orderItemMonos)
+                                            .collectList()
+                                            .flatMap(orderItemsSave -> orderItemRepository.saveAll(orderItemsSave)
+                                                    .then(orderRepository.save(order)
+                                                            .map(savedOrderLast -> savedOrderLast.getId())));
+                                })
+                                .flatMap(orderId -> basketRepository.deleteAllByCustomerId(customerId)
+                                        .then(Mono.just(orderId)));
+                    });
+            });
+    }
 
 }
