@@ -1,0 +1,53 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert default user
+      author: Pinayev Aleksey
+      changes:
+        - insert:
+            tableName: users
+            schemaName: public
+            columns:
+              - column:
+                  name: customer_id
+                  value: 3
+              - column:
+                  name: username
+                  value: admin
+              - column:
+                  name: password
+                  value: c48d4c13eb9c835f207739c1f0ddb27cbc5334a9ed4d90733627ec071f36bfcaea4ef3e4a948258d
+              - column:
+                  name: role
+                  value: ADMIN
+        - insert:
+            tableName: users
+            schemaName: public
+            columns:
+              - column:
+                  name: customer_id
+                  value: 1
+              - column:
+                  name: username
+                  value: user1
+              - column:
+                  name: password
+                  value: c48d4c13eb9c835f207739c1f0ddb27cbc5334a9ed4d90733627ec071f36bfcaea4ef3e4a948258d
+              - column:
+                  name: role
+                  value: USER
+        - insert:
+            tableName: users
+            schemaName: public
+            columns:
+              - column:
+                  name: customer_id
+                  value: 2
+              - column:
+                  name: username
+                  value: user2
+              - column:
+                  name: password
+                  value: c48d4c13eb9c835f207739c1f0ddb27cbc5334a9ed4d90733627ec071f36bfcaea4ef3e4a948258d
+              - column:
+                  name: role
+                  value: USER

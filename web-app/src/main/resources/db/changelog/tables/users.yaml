@@ -1,0 +1,60 @@
+databaseChangeLog:
+  - changeSet:
+      id: create users table
+      author: Pinayev Aleksey
+      changes:
+        - createTable:
+            tableName: users
+            schemaName: public
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: customer_id
+                  type: bigint
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: yaShop users index customer
+      author: Pinayev Aleksey
+      changes:
+        - createIndex:
+            tableName: users
+            indexName: idx_customer_id
+            columns:
+              - column:
+                  name: customer_id
+
+  - changeSet:
+      id: yaShop users index username
+      author: Pinayev Aleksey
+      changes:
+        - createIndex:
+            tableName: users
+            indexName: idx_username
+            columns:
+              - column:
+                  name: username

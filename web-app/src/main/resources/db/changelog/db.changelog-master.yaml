@@ -5,3 +5,7 @@ databaseChangeLog:
       file: web-app/src/main/resources/db/changelog/tables/basket.yaml
   - include:
       file: web-app/src/main/resources/db/changelog/tables/orders.yaml
+  - include:
+      file: web-app/src/main/resources/db/changelog/tables/users.yaml
+  - include:
+      file: web-app/src/main/resources/db/changelog/tables/users_data.yaml
