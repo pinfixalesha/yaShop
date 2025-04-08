@@ -1,10 +1,18 @@
 databaseChangeLog:
   - changeSet:
+      id: create payment schema
+      author: Pinayev Aleksey
+      changes:
+        - sql:
+            sql: CREATE SCHEMA IF NOT EXISTS payment;
+
+  - changeSet:
       id: yaShop users table
       author: Pinayev Aleksey
       changes:
         - createTable:
             tableName: users
+            schemaName: payment
             columns:
               - column:
                   name: id
@@ -30,6 +38,7 @@ databaseChangeLog:
       changes:
         - createIndex:
             tableName: users
+            schemaName: payment
             indexName: idx_customer_id
             columns:
               - column:
@@ -41,6 +50,7 @@ databaseChangeLog:
       changes:
         - insert:
             tableName: users
+            schemaName: payment
             columns:
               - column:
                   name: id
@@ -52,3 +62,20 @@ databaseChangeLog:
                   name: balance
                   valueNumeric: 100000
 
+  - changeSet:
+      id: yaShop users data 2
+      author: Pinayev Aleksey
+      changes:
+        - insert:
+            tableName: users
+            schemaName: payment
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 2
+              - column:
+                  name: customer_id
+                  valueNumeric: 2
+              - column:
+                  name: balance
+                  valueNumeric: 1000

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +31,7 @@ public class TovarCsvLoaderService {
     @Autowired
     private TovarRedisCacheService tovarRedisCacheService;
 
+    @Secured("ROLE_ADMIN")
     public Mono<String> uploadCsv(FilePart file) {
         if (file==null) {
             return Mono.just("Файл пуст!");

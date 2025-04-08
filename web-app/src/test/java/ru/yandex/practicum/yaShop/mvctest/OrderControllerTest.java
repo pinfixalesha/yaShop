@@ -1,10 +1,16 @@
 package ru.yandex.practicum.yaShop.mvctest;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockReset;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -81,7 +87,37 @@ public class OrderControllerTest {
         tovarId = tovarRepository.save(tovar).block().getId();
     }
 
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
+   // @Test
+   // void anonymousShouldBeRedirectedToLogin() throws Exception {
+        // CSRF-токен
+        //var authority = new SimpleGrantedAuthority("ROLE_USER");
+        //var authentication = new UsernamePasswordAuthenticationToken("user", "password", List.of(authority));
+        //SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+
+//Первое, что мы хотим протестировать, — это анонимного (неаутентифицированного) пользователя.
+        //webTestClient.get() .perform(get("/dashboard"))
+         //       .andExpect(status().is3xxRedirection())
+         //       .andExpect(redirectedUrlPattern("**/login"));
+
+  //  }
+
+    //@Test
+    //@WithMockUser(username = "testuser", roles = {"USER"})
+    //void shouldHaveCorrectPrincipal() {
+    //    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    //    assertEquals("testuser", auth.getName());
+   //     assertTrue(auth.getAuthorities().stream()
+   //             .anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
+   // }
+
     @Test
+    //@WithMockUser(username = "testuser", roles = {"USER"})
     void buyOrder() {
         when(paymentClientService.processPayment(anyLong(),any()))
                 .thenReturn(Mono.just(new PaymentResponse()

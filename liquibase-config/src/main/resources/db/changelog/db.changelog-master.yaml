@@ -1,9 +1,0 @@
-databaseChangeLog:
-  - include:
-      file: liquibase-config/src/main/resources/db/changelog/tables/tovars.yaml
-  - include:
-      file: liquibase-config/src/main/resources/db/changelog/tables/basket.yaml
-  - include:
-      file: liquibase-config/src/main/resources/db/changelog/tables/orders.yaml
-  - include:
-      file: liquibase-config/src/main/resources/db/changelog/tables/users.yaml
