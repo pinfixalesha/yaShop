@@ -56,4 +56,7 @@ public class SecurityUserDetails  implements UserDetails {
         return true;
     }
 
+    public Long getCustomerId() {
+        return customerId;
+    }
 }

@@ -9,10 +9,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.reactive.result.view.Rendering;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.yaShop.model.TovarModel;
+import ru.yandex.practicum.yaShop.model.UserModel;
 import ru.yandex.practicum.yaShop.service.BasketService;
 import ru.yandex.practicum.yaShop.service.CustomerServices;
 import ru.yandex.practicum.yaShop.service.TovarService;
+import ru.yandex.practicum.yaShop.service.UserService;
 
 import java.util.Optional;
 
@@ -30,13 +34,32 @@ public class TovarController {
     @Autowired
     private CustomerServices customerServices;
 
+    @Autowired
+    private UserService userService;
+
     @GetMapping("/{id}")
     public Mono<Rendering> getTovar(@PathVariable(name = "id") Long id) {
-        return customerServices.getCustomer()
-                .flatMap(customerId -> tovarService.getTovarById(id, customerId))
-                .map(tovarModel -> Rendering.view("item")
-                        .modelAttribute("item", tovarModel)
-                        .build());
+        Mono<UserModel> userModel=userService.getCurrentUser()
+                .switchIfEmpty(Mono.just(UserModel.builder()
+                        .customerId(0L)
+                        .username(userService.UNKNOWN_USER)
+                        .build()));
+
+        return userModel.flatMap(user -> {
+            Mono<TovarModel> tovarModelMono = tovarService.getTovarById(id, user.getCustomerId());
+
+            UserModel authorization;
+            if (user.getUsername().equals(userService.UNKNOWN_USER)) {
+                authorization=null;
+            } else {
+                authorization=user;
+            }
+
+            return tovarModelMono.map(tovarModel -> Rendering.view("item")
+                    .modelAttribute("item", tovarModel) // Передаем товар в модель
+                    .modelAttribute("authorization", authorization) // Передаем пользователя в модель
+                    .build());
+        });
     }
 
     @PostMapping(value = "/{id}")

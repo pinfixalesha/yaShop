@@ -7,10 +7,23 @@
 </head>
 
 <body>
-    <a href="/orders" style="float:right;">
+    <span th:if="${authorization != null}">
+        <span style="margin-right: 20px;">
+            <b>Пользователь: </b><span th:text="${authorization.username}"></span>
+        </span>
+        <a href="/logout" style="margin-right: 20px;">
+            <b>ВЫХОД</b>
+        </a>
+    </span>
+    <span th:if="${authorization == null}">
+        <a href="/login" style="margin-right: 20px;">
+            <b>ВОЙТИ</b>
+        </a>
+    </span>
+    <a th:if="${authorization != null}" href="/orders" style="float:right;">
         <b>ЗАКАЗЫ &cudarrr;</b>
     </a>
-    <a href="/cart/items" style="float:right;">
+    <a th:if="${authorization != null}" href="/cart/items" style="float:right;">
         <b>КОРЗИНА &cudarrr;</b>
     </a>
     <table style="width:70%;margin-left:auto;margin-right:auto;">
@@ -71,7 +84,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <form th:action="${'/main/items/'+item.getId()}" method="post">
+                            <form th:if="${authorization != null}" th:action="${'/main/items/'+item.getId()}" method="post">
                                 <button name="action" value="minus">-</button>
                                 <span th:text="${item.getCount()}"></span>
                                 <button name="action" value="plus">+</button>
