@@ -68,10 +68,16 @@ RESTful-сервис платежей к основному приложению
 | user2            | pass   | USER   |
 | admin            | pass   | ADMIN  |
 
-- Авторизационный сервер KeyCloak http://localhost:8282/
+- Авторизационный сервер KeyCloak http://localhost:8282/ для обмена с платежным сервисом
 Данные для авторизации 
   - KEYCLOAK_ADMIN: admin
   - KEYCLOAK_ADMIN_PASSWORD: adminpassword
+  - Настройка клиента KeyCloak
+    - Шаг 1. Создание клиента ![](images/Keycloak_client_1.jpg)
+    - Шаг 2. Настройки клиента ![](images/Keycloak_client_2.jpg)
+    - Шаг 3. Завершение ![](images/Keycloak_client_3.jpg)
+    - Шаг 4. Даные авторизации клиента для приложения ![](images/Keycloak_client_4.jpg)
+
 
  ### Дополнительная функциональность
 
