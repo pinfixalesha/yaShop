@@ -36,12 +36,16 @@ public class BalanceControllerTests {
         // Очистка данных перед каждым тестом
         userRepository.deleteAll().block();
 
-        // Создание тестового товара
         User user = new User();
         user.setCustomerId(1L);
-        user.setBalance(BigDecimal.valueOf(100));
-
+        user.setBalance(BigDecimal.valueOf(10000));
         userRepository.save(user).block();
+
+        user = new User();
+        user.setCustomerId(2L);
+        user.setBalance(BigDecimal.valueOf(20000));
+        userRepository.save(user).block();
+
     }
 
     @Test
@@ -53,12 +57,12 @@ public class BalanceControllerTests {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.balance").isEqualTo(100);
+                .jsonPath("$.balance").isEqualTo(10000);
     }
 
     @Test
     void testNoFoundUser() {
-        Long userId = 2L;
+        Long userId = 3L;
 
         webTestClient.get()
                 .uri("/balance/{userId}", userId)

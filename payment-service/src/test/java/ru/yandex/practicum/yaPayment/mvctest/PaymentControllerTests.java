@@ -34,18 +34,22 @@ public class PaymentControllerTests {
         // Очистка данных перед каждым тестом
         userRepository.deleteAll().block();
 
-        // Создание тестового товара
         User user = new User();
         user.setCustomerId(1L);
-        user.setBalance(BigDecimal.valueOf(100));
-
+        user.setBalance(BigDecimal.valueOf(10000));
         userRepository.save(user).block();
+
+        user = new User();
+        user.setCustomerId(2L);
+        user.setBalance(BigDecimal.valueOf(20000));
+        userRepository.save(user).block();
+
     }
 
     @Test
     void testSuccessfulPayment() {
         Long userId = 1L;
-        PaymentRequest request = new PaymentRequest().amount(50.0);
+        PaymentRequest request = new PaymentRequest().amount(5000.0);
 
         webTestClient.post()
                 .uri("/payment/{userId}", userId)
@@ -61,7 +65,7 @@ public class PaymentControllerTests {
     @Test
     void testInsufficientPayment() {
         Long userId = 1L;
-        PaymentRequest request = new PaymentRequest().amount(500.0);
+        PaymentRequest request = new PaymentRequest().amount(50000.0);
 
         webTestClient.post()
                 .uri("/payment/{userId}", userId)
@@ -76,7 +80,7 @@ public class PaymentControllerTests {
 
     @Test
     void testUserNoFoundPayment() {
-        Long userId = 2L;
+        Long userId = 3L;
         PaymentRequest request = new PaymentRequest().amount(100.0);
 
         webTestClient.post()

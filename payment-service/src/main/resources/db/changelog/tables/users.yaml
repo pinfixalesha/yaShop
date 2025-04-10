@@ -78,4 +78,4 @@ databaseChangeLog:
                   valueNumeric: 2
               - column:
                   name: balance
-                  valueNumeric: 1000
+                  valueNumeric: 10000
