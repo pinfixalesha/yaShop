@@ -31,7 +31,6 @@ public class TovarCsvLoaderService {
     @Autowired
     private TovarRedisCacheService tovarRedisCacheService;
 
-    @Secured("ROLE_ADMIN")
     public Mono<String> uploadCsv(FilePart file) {
         if (file==null) {
             return Mono.just("Файл пуст!");

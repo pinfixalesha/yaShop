@@ -2,6 +2,7 @@ package ru.yandex.practicum.yaShop.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,7 @@ public class OrderController {
     private CustomerServices customerServices;
 
     @GetMapping("/{id}")
+    @Secured("ROLE_USER")
     public Mono<Rendering> getOrder(@PathVariable(name = "id") Long id,
                            @RequestParam(required = false, name = "newOrder") Boolean newOrder) {
         return orderService.getOrderById(id)
@@ -39,6 +41,7 @@ public class OrderController {
     }
 
     @GetMapping
+    @Secured("ROLE_USER")
     public Mono<Rendering> getOrders() {
         return customerServices.getCustomer()
                 .flatMapMany(customerId -> orderService.getOrdersByCustomer(customerId))

@@ -1,13 +1,22 @@
 package ru.yandex.practicum.yaShop.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.yaShop.model.UserModel;
 
 @Service
 public class CustomerServices {
 
-    //Заглушка, для получения текущего ID клиента. Задание не предусматривает авторизацию клиента, поэтому пока так
+    @Autowired
+    private UserService userService;
+
     public Mono<Long> getCustomer() {
-        return Mono.just(1L);
+        return userService.getCurrentUser()
+                .switchIfEmpty(Mono.just(UserModel.builder()
+                        .customerId(0L)
+                        .username(userService.UNKNOWN_USER)
+                        .build()))
+                .flatMap(userModel -> Mono.just(userModel.getCustomerId()));
     }
 }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.yaShop.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -112,6 +113,7 @@ public class MainController {
 
 
     @PostMapping(value = "/{id}")
+    @Secured("ROLE_USER")
     public Mono<Rendering> actionBasket(@PathVariable(name = "id") Long tovarId,
                                       ServerWebExchange exchange) {
         return exchange.getFormData()

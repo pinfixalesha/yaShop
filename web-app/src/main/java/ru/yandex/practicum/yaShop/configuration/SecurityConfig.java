@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .anyExchange().authenticated()
                 )
                 .formLogin(withDefaults())
+                .csrf(csrf -> csrf.disable())
                 .securityContextRepository(new WebSessionServerSecurityContextRepository())
                 .build();
     }

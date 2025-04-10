@@ -2,6 +2,7 @@ package ru.yandex.practicum.yaShop.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,6 +38,7 @@ public class BasketController {
 
 
     @GetMapping
+    @Secured("ROLE_USER")
     public Mono<Rendering> getBasket() {
         return customerServices.getCustomer()
             .flatMap(customerId -> {
@@ -75,6 +77,7 @@ public class BasketController {
     }
 
     @PostMapping(value = "/{id}")
+    @Secured("ROLE_USER")
     public Mono<Rendering> actionBasket(@PathVariable(name = "id") Long tovarId,
                                         ServerWebExchange exchange) {
         return exchange.getFormData()
