@@ -1,6 +1,9 @@
 package ru.yandex.practicum.yaShop.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -15,24 +18,44 @@ public class PaymentClientService {
     @Autowired
     private WebClient paymentClient;
 
-    public Mono<BalanceResponse> getBalance(Long userId) {
-        return paymentClient.get()
-                .uri("/balance/{userId}", userId)
-                .retrieve()
-                .bodyToMono(BalanceResponse.class)
-                .switchIfEmpty(Mono.just(new BalanceResponse()
-                        .balance(0.0)))
-                .onErrorResume(e -> Mono.just(new BalanceResponse()
-                        .balance(0.0)));
+    @Autowired
+    private OAuth2AuthorizedClientManager authorizedClientManager;
 
+    private Mono<String> getAccessToken() {
+        return Mono.fromCallable(() -> {
+            OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(
+                    OAuth2AuthorizeRequest.withClientRegistrationId("payment")
+                            .principal("system") // Используем системный принципал
+                            .build()
+            );
+
+            if (authorizedClient == null || authorizedClient.getAccessToken() == null) {
+                throw new RuntimeException("Не удалось получить токен OAuth2");
+            }
+
+            return authorizedClient.getAccessToken().getTokenValue();
+        });
+    }
+
+    public Mono<BalanceResponse> getBalance(Long userId) {
+        return getAccessToken()
+                .flatMap(token -> paymentClient.get()
+                        .uri("/balance/{userId}", userId)
+                        .header("Authorization", "Bearer " + token)
+                        .retrieve()
+                        .bodyToMono(BalanceResponse.class))
+                .switchIfEmpty(Mono.just(new BalanceResponse().balance(0.0)))
+                .onErrorResume(e -> Mono.just(new BalanceResponse().balance(0.0)));
     }
 
     public Mono<PaymentResponse> processPayment(Long userId, PaymentRequest paymentRequest) {
-        return paymentClient.post()
-                .uri("/payment/{userId}", userId)
-                .bodyValue(paymentRequest)
-                .retrieve()
-                .bodyToMono(PaymentResponse.class)
+        return getAccessToken()
+                .flatMap(token -> paymentClient.post()
+                        .uri("/payment/{userId}", userId)
+                        .header("Authorization", "Bearer " + token)
+                        .bodyValue(paymentRequest)
+                        .retrieve()
+                        .bodyToMono(PaymentResponse.class))
                 .switchIfEmpty(Mono.just(new PaymentResponse()
                         .error(true)
                         .message("Оплата не удалась")))
