@@ -27,16 +27,19 @@ public class PaymentController implements PaymentApi {
         return paymentRequest.flatMap(request ->
                 paymentService.processPayment(userId, request)
                         .map(ResponseEntity::ok)
-                        .onErrorResume(InsufficientFundsException.class, e ->
-                                Mono.just(ResponseEntity.badRequest().body(
-                                        new PaymentResponse()
-                                                .error(true)
-                                                .message("Недостаточно средств на балансе")
-                                ))
-                        )
-                        .onErrorResume(UserNotFoundException.class, e ->
-                                Mono.just(ResponseEntity.notFound().build())
-                        )
+                        .onErrorResume(InsufficientFundsException.class, this::resultInsufficientFundsError)
+                        .onErrorResume(UserNotFoundException.class, this::resultUserNotFoundError)
         );
+    }
+
+    private Mono<ResponseEntity<PaymentResponse>> resultInsufficientFundsError(InsufficientFundsException e) {
+        PaymentResponse errorResponse = new PaymentResponse()
+                .error(true)
+                .message("Недостаточно средств на балансе");
+        return Mono.just(ResponseEntity.badRequest().body(errorResponse));
+    }
+
+    private Mono<ResponseEntity<PaymentResponse>> resultUserNotFoundError(UserNotFoundException e) {
+        return Mono.just(ResponseEntity.notFound().build());
     }
 }
