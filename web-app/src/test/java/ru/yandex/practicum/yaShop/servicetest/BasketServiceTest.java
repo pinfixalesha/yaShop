@@ -126,7 +126,7 @@ public class BasketServiceTest {
         assertEquals(1L, orderId);
 
         verify(basketRepository, times(1)).deleteAllByCustomerId(customerId);
-        verify(orderRepository, times(2)).save(any());
+        verify(orderRepository, times(1)).save(any());
         verify(orderItemRepository, times(1)).saveAll(anyList());
     }
 
