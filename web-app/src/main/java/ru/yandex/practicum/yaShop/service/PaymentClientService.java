@@ -22,19 +22,21 @@ public class PaymentClientService {
     private OAuth2AuthorizedClientManager authorizedClientManager;
 
     private Mono<String> getAccessToken() {
-        return Mono.fromCallable(() -> {
-            OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(
-                    OAuth2AuthorizeRequest.withClientRegistrationId("payment")
-                            .principal("system") // Используем системный принципал
-                            .build()
-            );
+        return Mono.fromCallable(this::authorizeAndGetAccessToken);
+    }
 
-            if (authorizedClient == null || authorizedClient.getAccessToken() == null) {
-                throw new RuntimeException("Не удалось получить токен OAuth2");
-            }
+    private String authorizeAndGetAccessToken() {
+        OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(
+                OAuth2AuthorizeRequest.withClientRegistrationId("payment")
+                        .principal("system") // Используем системный принципал
+                        .build()
+        );
 
-            return authorizedClient.getAccessToken().getTokenValue();
-        });
+        if (authorizedClient == null || authorizedClient.getAccessToken() == null) {
+            throw new RuntimeException("Не удалось получить токен OAuth2");
+        }
+
+        return authorizedClient.getAccessToken().getTokenValue();
     }
 
     public Mono<BalanceResponse> getBalance(Long userId) {

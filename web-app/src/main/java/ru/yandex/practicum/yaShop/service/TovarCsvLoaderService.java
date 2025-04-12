@@ -15,6 +15,7 @@ import ru.yandex.practicum.yaShop.entities.Tovar;
 import ru.yandex.practicum.yaShop.repositories.TovarRepository;
 import com.opencsv.CSVReader;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
@@ -49,32 +50,48 @@ public class TovarCsvLoaderService {
     }
 
     private Mono<List<Tovar>> parseCsv(InputStream inputStream) {
-        return Mono.fromCallable(() -> {
-            try (CSVReader csvReader = new CSVReaderBuilder(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
-                    .withCSVParser(new CSVParserBuilder()
-                            .withSeparator(';')
-                            .withQuoteChar('"')
-                            .withEscapeChar('\\')
-                            .build())
-                    .build()) {
+        return Mono.fromCallable(() -> parseCsvRecords(inputStream));
+    }
 
-                List<Tovar> tovars = new ArrayList<>();
-                String[] nextRecord;
+    private List<Tovar> parseCsvRecords(InputStream inputStream) {
+        try {
+            CSVReader csvReader = createCsvReader(inputStream);
+            List<Tovar> tovars = new ArrayList<>();
+            String[] nextRecord;
 
-                while ((nextRecord = csvReader.readNext()) != null) {
-                    if (nextRecord.length == 4) {
-                        Tovar tovar = new Tovar();
-                        tovar.setName(nextRecord[0]); // Наименование
-                        tovar.setPicture(nextRecord[1]); // Картинка
-                        tovar.setDescription(nextRecord[2]); // Описание
-                        tovar.setPrice(BigDecimal.valueOf(Double.parseDouble(nextRecord[3]))); // Цена
-                        tovars.add(tovar);
-                    }
+            while ((nextRecord = csvReader.readNext()) != null) {
+                Tovar tovar = mapCsvRecordToTovar(nextRecord);
+                if (tovar != null) {
+                    tovars.add(tovar);
                 }
-
-                return tovars;
             }
-        });
+
+            return tovars;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private CSVReader createCsvReader(InputStream inputStream) {
+        return new CSVReaderBuilder(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+                .withCSVParser(new CSVParserBuilder()
+                        .withSeparator(';')
+                        .withQuoteChar('"')
+                        .withEscapeChar('\\')
+                        .build())
+                .build();
+    }
+
+    private Tovar mapCsvRecordToTovar(String[] record) {
+        if (record.length == 4) {
+            Tovar tovar = new Tovar();
+            tovar.setName(record[0]); // Наименование
+            tovar.setPicture(record[1]); // Картинка
+            tovar.setDescription(record[2]); // Описание
+            tovar.setPrice(BigDecimal.valueOf(Double.parseDouble(record[3]))); // Цена
+            return tovar;
+        }
+        return null;
     }
 
     private Mono<String> saveTovarsToDB(List<Tovar> tovars) {

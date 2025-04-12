@@ -41,40 +41,45 @@ public class BasketController {
     @Secured("ROLE_USER")
     public Mono<Rendering> getBasket() {
         return customerServices.getCustomer()
-            .flatMap(customerId -> {
-                //баланс
-                Mono<BalanceResponse> balanceMono = paymentClientService.getBalance(customerId);
-                // статус сервиса
-                Mono<PaymentHealthResponse> paymentHealthMono = paymentClientService.checkHealth();
-                // Корзина
-                Mono<List<BasketModel>> basketModelsMono = basketService.getBasketByCustomerId(customerId)
-                        .collectList();
-                return Mono.zip(balanceMono, paymentHealthMono, basketModelsMono)
-                        .map(tuple -> {
-                            BalanceResponse balance = tuple.getT1();
-                            PaymentHealthResponse paymentHealth = tuple.getT2();
-                            List<BasketModel> basketModels = tuple.getT3();
-                            BigDecimal total=basketService.calculateTotalAmount(basketModels);
-
-                            boolean paymentNotAvailable = !("UP".equals(paymentHealth.getStatus()));
-                            boolean noMoney= (total.compareTo(new BigDecimal(balance.getBalance()))>0);
-                            if (paymentNotAvailable) {
-                                balance=null;
-                            }
-                            boolean canBuy=!(paymentNotAvailable||noMoney);
-
-                            return Rendering.view("cart")
-                                    .modelAttribute("items", basketModels)
-                                    .modelAttribute("total", total)
-                                    .modelAttribute("empty", basketModels.isEmpty())
-                                    .modelAttribute("paymentNotAvailable", paymentNotAvailable)
-                                    .modelAttribute("noMoney", noMoney)
-                                    .modelAttribute("canBuy", canBuy)
-                                    .modelAttribute("balance", balance)
-                                    .build();
-                        });
-            });
+                .flatMap(customerId -> {
+                    //баланс
+                    Mono<BalanceResponse> balanceMono = paymentClientService.getBalance(customerId);
+                    // статус сервиса
+                    Mono<PaymentHealthResponse> paymentHealthMono = paymentClientService.checkHealth();
+                    // Корзина
+                    Mono<List<BasketModel>> basketModelsMono = basketService.getBasketByCustomerId(customerId)
+                            .collectList();
+                    return Mono.zip(balanceMono, paymentHealthMono, basketModelsMono)
+                            .map(tuple -> buildRendering(tuple.getT1(),
+                                    tuple.getT2(),
+                                    tuple.getT3()));
+                });
     }
+
+    private Rendering buildRendering(BalanceResponse balance,
+                                     PaymentHealthResponse paymentHealth,
+                                     List<BasketModel> basketModels) {
+
+        BigDecimal total = basketService.calculateTotalAmount(basketModels);
+
+        boolean paymentNotAvailable = !("UP".equals(paymentHealth.getStatus()));
+        boolean noMoney = (total.compareTo(new BigDecimal(balance.getBalance())) > 0);
+        if (paymentNotAvailable) {
+            balance = null;
+        }
+        boolean canBuy = !(paymentNotAvailable || noMoney);
+
+        return Rendering.view("cart")
+                .modelAttribute("items", basketModels)
+                .modelAttribute("total", total)
+                .modelAttribute("empty", basketModels.isEmpty())
+                .modelAttribute("paymentNotAvailable", paymentNotAvailable)
+                .modelAttribute("noMoney", noMoney)
+                .modelAttribute("canBuy", canBuy)
+                .modelAttribute("balance", balance)
+                .build();
+    }
+
 
     @PostMapping(value = "/{id}")
     @Secured("ROLE_USER")
@@ -101,7 +106,7 @@ public class BasketController {
     public Mono<Rendering> deleteBasket(Long tovarId) {
         return customerServices.getCustomer()
                 .flatMap(customerId -> {
-                    Mono<Void> voidMono=basketService.deleteFromBasket(tovarId, customerId);
+                    Mono<Void> voidMono = basketService.deleteFromBasket(tovarId, customerId);
 
                     return voidMono.then(Mono.just(Rendering.redirectTo("/cart/items").build()));
                 });
@@ -110,7 +115,7 @@ public class BasketController {
     public Mono<Rendering> plusBasket(Long tovarId) {
         return customerServices.getCustomer()
                 .flatMap(customerId -> {
-                    Mono<Void> voidMono=basketService.addToBasket(tovarId, customerId);
+                    Mono<Void> voidMono = basketService.addToBasket(tovarId, customerId);
 
                     return voidMono.then(Mono.just(Rendering.redirectTo("/cart/items").build()));
                 });
@@ -119,7 +124,7 @@ public class BasketController {
     public Mono<Rendering> minusBasket(Long tovarId) {
         return customerServices.getCustomer()
                 .flatMap(customerId -> {
-                    Mono<Void> voidMono=basketService.removeFromBasket(tovarId, customerId);
+                    Mono<Void> voidMono = basketService.removeFromBasket(tovarId, customerId);
 
                     return voidMono.then(Mono.just(Rendering.redirectTo("/cart/items").build()));
                 });

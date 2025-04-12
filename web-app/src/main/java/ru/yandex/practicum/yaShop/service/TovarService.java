@@ -54,17 +54,17 @@ public class TovarService {
         return basketFlux.collectList()
                 .flatMapMany(basket -> tovarsFlux
                         .map(tovarMapper::mapToModel)
-                        .map(tovarModel -> {
-                            Integer count = basket.stream()
-                                    .filter(b -> b.getTovarId().equals(tovarModel.getId()))
-                                    .findFirst()
-                                    .map(Basket::getQuantity)
-                                    .orElse(0);
-                            tovarModel.setCount(count);
-                            return tovarModel;
-                        }));
+                        .map(tovarModel -> addBasketCount(tovarModel, basket)));
+    }
 
-
+    private TovarModel addBasketCount(TovarModel tovarModel, List<Basket> basket) {
+        Integer count = basket.stream()
+                .filter(b -> b.getTovarId().equals(tovarModel.getId()))
+                .findFirst()
+                .map(Basket::getQuantity)
+                .orElse(0);
+        tovarModel.setCount(count);
+        return tovarModel;
     }
 
     public Mono<Tovar> getTovarByIdWithCache(Long id) {
@@ -75,22 +75,24 @@ public class TovarService {
 
     public Flux<Tovar> getTovarListWithCache(String sortType, String namePart, int limit, int offset) {
         return tovarRedisCacheService.getCachedListTovar(sortType, namePart, limit, offset)
-                .switchIfEmpty(Flux.defer(() -> {
-                    Flux<Tovar> tovarsFlux;
-                    if (sortType.equalsIgnoreCase(SORT_TYPE_ALPHA)) {
-                        tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderByName(namePart, limit, offset);
-                    } else if (sortType.equalsIgnoreCase(SORT_TYPE_PRICE)) {
-                        tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderByPrice(namePart, limit, offset);
-                    } else {
-                        tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderById(namePart, limit, offset);
-                    }
+                .switchIfEmpty(Flux.defer(() -> fetchAndCacheTovars(sortType, namePart, limit, offset)));
+    }
 
-                    return tovarsFlux.collectList()
-                            .doOnNext(tovars ->
-                                    tovarRedisCacheService.cacheListTovar(sortType, namePart, limit, offset, tovars).subscribe()
-                            )
-                            .flatMapMany(Flux::fromIterable);
-                }));
+    private Flux<Tovar> fetchAndCacheTovars(String sortType, String namePart, int limit, int offset) {
+        Flux<Tovar> tovarsFlux;
+        if (sortType.equalsIgnoreCase(SORT_TYPE_ALPHA)) {
+            tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderByName(namePart, limit, offset);
+        } else if (sortType.equalsIgnoreCase(SORT_TYPE_PRICE)) {
+            tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderByPrice(namePart, limit, offset);
+        } else {
+            tovarsFlux = tovarRepository.findByNameContainingIgnoreCaseOrderById(namePart, limit, offset);
+        }
+
+        return tovarsFlux.collectList()
+                .doOnNext(tovars ->
+                        tovarRedisCacheService.cacheListTovar(sortType, namePart, limit, offset, tovars).subscribe()
+                )
+                .flatMapMany(Flux::fromIterable);
     }
 
     public Mono<TovarModel> getTovarById(Long id, Long customerId) {
@@ -102,15 +104,7 @@ public class TovarService {
         return basketFlux.collectList()
                 .flatMap(basket -> tovarMono
                         .map(tovarMapper::mapToModel)
-                        .map(tovarModel -> {
-                            Integer count = basket.stream()
-                                    .filter(b -> b.getTovarId().equals(tovarModel.getId()))
-                                    .findFirst()
-                                    .map(Basket::getQuantity)
-                                    .orElse(0);
-                            tovarModel.setCount(count);
-                            return tovarModel;
-                        }));
+                        .map(tovarModel -> addBasketCount(tovarModel, basket)));
     }
 
 }

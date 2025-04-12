@@ -3,8 +3,6 @@ package ru.yandex.practicum.yaShop.controller;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,57 +58,66 @@ public class MainController {
         Mono<WebSession> webSession=exchange.getSession();
 
         return Mono.zip(userModel, webSession)
-                .flatMap(tuple -> {
-                    UserModel user = tuple.getT1();
-                    UserModel authorization;
-                    if (user.getUsername().equals(userService.UNKNOWN_USER)) {
-                        authorization=null;
-                    } else {
-                        authorization=user;
-                    }
-
-                    WebSession session = tuple.getT2();
-
-                    PagingPageInfo paging = session.getAttributeOrDefault("paging", new PagingPageInfo());
-
-                    paging.setSearch(Optional.ofNullable(search).orElse(paging.getSearch()));
-                    paging.setSort(Optional.ofNullable(sort).orElse(paging.getSort()));
-                    paging.setPageNumber(Optional.ofNullable(pageNumber).orElse(paging.getPageNumber()));
-                    paging.setPageSize(Optional.ofNullable(pageSize).orElse(paging.getPageSize()));
-
-                    return customerServices.getCustomer()
-                            .flatMap(customerId -> {
-
-                                Mono<Long> totalItemsMono = tovarService.getTotalTovarCount();
-
-                                Flux<TovarModel> tovarsFlux = tovarService.getTovarsWithPaginationAndSort(
-                                        paging.getPageNumber() - 1,
-                                        paging.getPageSize(),
-                                        paging.getSort(),
-                                        paging.getSearch(),
-                                        customerId
-                                );
-
-                                // Соединяем данные
-                                return Mono.zip(totalItemsMono, tovarsFlux.collectList())
-                                        .flatMap(tuple2 -> {
-                                            Long totalItems = tuple2.getT1();
-                                            List<TovarModel> tovars = tuple2.getT2();
-
-                                            paging.setTotalItems(totalItems);
-                                            session.getAttributes().put("paging", paging);
-
-                                            return session.save()
-                                                    .thenReturn(Rendering.view("main")
-                                                            .modelAttribute("items", tovars)
-                                                            .modelAttribute("paging", paging)
-                                                            .modelAttribute("authorization", authorization)
-                                                            .build());
-                                        });
-                            });
-                });
+                .flatMap(tuple -> processUserAndSessionData(
+                        tuple.getT1(), tuple.getT2(),
+                        search, sort,
+                        pageSize, pageNumber));
     }
 
+    private Mono<Rendering> processUserAndSessionData(UserModel user,
+                                                      WebSession session,
+                                                      String search, String sort,
+                                                      Integer pageSize, Integer pageNumber) {
+        UserModel authorization = user.getUsername().equals(userService.UNKNOWN_USER) ? null : user;
+
+        PagingPageInfo paging = session.getAttributeOrDefault("paging", new PagingPageInfo());
+        updatePaging(paging, search, sort, pageSize, pageNumber);
+
+        return customerServices.getCustomer()
+                .flatMap(customerId -> fetchAndRenderTovars(customerId, paging, session, authorization));
+    }
+
+
+    private void updatePaging(PagingPageInfo paging, String search, String sort, Integer pageSize, Integer pageNumber) {
+        paging.setSearch(Optional.ofNullable(search).orElse(paging.getSearch()));
+        paging.setSort(Optional.ofNullable(sort).orElse(paging.getSort()));
+        paging.setPageNumber(Optional.ofNullable(pageNumber).orElse(paging.getPageNumber()));
+        paging.setPageSize(Optional.ofNullable(pageSize).orElse(paging.getPageSize()));
+    }
+
+    private Mono<Rendering> fetchAndRenderTovars(Long customerId, PagingPageInfo paging, WebSession session, UserModel authorization) {
+        Mono<Long> totalItemsMono = tovarService.getTotalTovarCount();
+
+        Flux<TovarModel> tovarsFlux = tovarService.getTovarsWithPaginationAndSort(
+                paging.getPageNumber() - 1,
+                paging.getPageSize(),
+                paging.getSort(),
+                paging.getSearch(),
+                customerId
+        );
+
+        return Mono.zip(totalItemsMono, tovarsFlux.collectList())
+                .flatMap(tuple -> processFetchedTovars(tuple.getT1(),
+                        tuple.getT2(),
+                        paging,
+                        session,
+                        authorization));
+    }
+
+    private Mono<Rendering> processFetchedTovars(Long totalItems,
+                                         List<TovarModel> tovars,
+                                         PagingPageInfo paging,
+                                         WebSession session,
+                                         UserModel authorization) {
+        paging.setTotalItems(totalItems);
+        session.getAttributes().put("paging", paging);
+
+        return Mono.just(Rendering.view("main")
+                .modelAttribute("items", tovars)
+                .modelAttribute("paging", paging)
+                .modelAttribute("authorization", authorization)
+                .build());
+    }
 
     @PostMapping(value = "/{id}")
     @Secured("ROLE_USER")

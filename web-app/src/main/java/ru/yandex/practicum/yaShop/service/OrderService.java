@@ -9,6 +9,7 @@ import ru.yandex.practicum.yaShop.model.OrderModel;
 import ru.yandex.practicum.yaShop.repositories.OrderItemRepository;
 import ru.yandex.practicum.yaShop.repositories.OrderRepository;
 import ru.yandex.practicum.yaShop.repositories.TovarRepository;
+import ru.yandex.practicum.yaShop.entities.Order;
 
 @Service
 public class OrderService {
@@ -31,15 +32,19 @@ public class OrderService {
 
     public Mono<OrderModel> getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
-                .flatMap(order -> orderItemRepository.findByOrderId(order.getId())
-                        .flatMap(orderItem -> tovarService.getTovarByIdWithCache(orderItem.getTovarId())
-                                .map(tovar -> orderMapper.mapToOrderItemModel(orderItem, tovar)))
-                        .collectList()
-                        .map(orderItemModels -> {
-                            OrderModel orderModel = orderMapper.mapToOrderModel(order);
-                            orderModel.setItems(orderItemModels);
-                            return orderModel;
-                        }));
+                .flatMap(this::processOrderWithItems);
+    }
+
+    private Mono<OrderModel> processOrderWithItems(Order order) {
+        return orderItemRepository.findByOrderId(order.getId())
+                .flatMap(orderItem -> tovarService.getTovarByIdWithCache(orderItem.getTovarId())
+                        .map(tovar -> orderMapper.mapToOrderItemModel(orderItem, tovar)))
+                .collectList()
+                .map(orderItemModels -> {
+                    OrderModel orderModel = orderMapper.mapToOrderModel(order);
+                    orderModel.setItems(orderItemModels);
+                    return orderModel;
+                });
     }
 
     public Flux<OrderModel> getOrdersByCustomer(Long customerId) {

@@ -8,6 +8,7 @@ import ru.yandex.practicum.yaPayment.dto.PaymentResponse;
 import ru.yandex.practicum.yaPayment.exceptions.InsufficientFundsException;
 import ru.yandex.practicum.yaPayment.exceptions.UserNotFoundException;
 import ru.yandex.practicum.yaPayment.repositories.UserRepository;
+import ru.yandex.practicum.yaPayment.entities.User;
 
 import java.math.BigDecimal;
 
@@ -22,15 +23,17 @@ public class PaymentService {
         BigDecimal amount = BigDecimal.valueOf(paymentRequest.getAmount());
         return userRepository.findByCustomerId(userId)
                 .next()
-                .flatMap(user -> {
-                    if (user.getBalance().compareTo(amount) >= 0) {
-                        user.setBalance(user.getBalance().subtract(amount));
-                        return userRepository.save(user)
-                                .thenReturn(new PaymentResponse().error(false).message("Операция прошла успешно"));
-                    } else {
-                        return Mono.error(new InsufficientFundsException());
-                    }
-                })
+                .flatMap(user -> processUserPayment(user, amount))
                 .switchIfEmpty(Mono.error(new UserNotFoundException(userId)));
+    }
+
+    private Mono<PaymentResponse> processUserPayment(User user, BigDecimal amount) {
+        if (user.getBalance().compareTo(amount) >= 0) {
+            user.setBalance(user.getBalance().subtract(amount));
+            return userRepository.save(user)
+                    .thenReturn(new PaymentResponse().error(false).message("Операция прошла успешно"));
+        } else {
+            return Mono.error(new InsufficientFundsException());
+        }
     }
 }
