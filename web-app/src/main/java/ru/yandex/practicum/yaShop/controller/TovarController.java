@@ -46,21 +46,22 @@ public class TovarController {
                         .username(userService.UNKNOWN_USER)
                         .build()));
 
-        return userModel.flatMap(user -> {
-            Mono<TovarModel> tovarModelMono = tovarService.getTovarById(id, user.getCustomerId());
+        return userModel.flatMap(user -> processUserAndTovarData(user, id));
+    }
 
-            UserModel authorization;
-            if (user.getUsername().equals(userService.UNKNOWN_USER)) {
-                authorization=null;
-            } else {
-                authorization=user;
-            }
+    private Mono<Rendering> processUserAndTovarData(UserModel user, Long tovarId) {
+        UserModel authorization = user.getUsername().equals(userService.UNKNOWN_USER) ? user : null;
 
-            return tovarModelMono.map(tovarModel -> Rendering.view("item")
-                    .modelAttribute("item", tovarModel) // Передаем товар в модель
-                    .modelAttribute("authorization", authorization) // Передаем пользователя в модель
-                    .build());
-        });
+        Mono<TovarModel> tovarModelMono = tovarService.getTovarById(tovarId, user.getCustomerId());
+
+        return tovarModelMono.map(tovarModel -> buildRendering(tovarModel, authorization));
+    }
+
+    private Rendering buildRendering(TovarModel tovarModel, UserModel authorization) {
+        return Rendering.view("item")
+                .modelAttribute("item", tovarModel) // Передаем товар в модель
+                .modelAttribute("authorization", authorization) // Передаем пользователя в модель
+                .build();
     }
 
     @PostMapping(value = "/{id}")
