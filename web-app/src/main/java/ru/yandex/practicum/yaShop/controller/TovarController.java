@@ -50,7 +50,7 @@ public class TovarController {
     }
 
     private Mono<Rendering> processUserAndTovarData(UserModel user, Long tovarId) {
-        UserModel authorization = user.getUsername().equals(userService.UNKNOWN_USER) ? user : null;
+        UserModel authorization = !user.getUsername().equals(userService.UNKNOWN_USER) ? user : null;
 
         Mono<TovarModel> tovarModelMono = tovarService.getTovarById(tovarId, user.getCustomerId());
 
