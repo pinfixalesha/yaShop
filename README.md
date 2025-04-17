@@ -97,6 +97,7 @@ git clone https://github.com/pinfixalesha/yaShop.git
 
 1. Выполните следующую команду для запуска PostgreSQL и Redis
 ```bash
+docker network create kafka
 docker-compose up -d 
 ```
 2. Проверка работы PostgreSQL, Redis

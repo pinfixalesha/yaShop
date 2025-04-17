@@ -40,5 +40,55 @@ services:
       - postgres_network
     command: start-dev # Запуск в режиме разработки
 
+  kafka:
+    image: bitnami/kafka
+    container_name: kafka
+    hostname: example.kafka.com
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    expose:
+      - "9093"
+    env_file:
+      - ./kafka/kafka.env
+    volumes:
+      - ./kafka/kafka_server_jaas.conf:/opt/bitnami/kafka/config/kafka_server_jaas.conf
+      - ./kafka/server.properties:/opt/bitnami/kafka/config/server.properties
+      - ./kafka/cert/keystore/kafka.keystore.jks:/opt/bitnami/kafka/config/certs/kafka.keystore.jks:ro
+      - ./kafka/cert/truststore/kafka.truststore.jks:/opt/bitnami/kafka/config/certs/kafka.truststore.jks:ro
+      - ./kafka/producer.properties:/opt/bitnami/kafka/config/producer.properties
+      - ./kafka/consumer.properties:/opt/bitnami/kafka/config/consumer.properties
+    networks:
+      - kafka
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    restart: unless-stopped
+    ports:
+      - "8082:8080"
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: example.kafka.com:9092
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SASL_SSL
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /opt/kafka-ui/certs/kafka.truststore.jks
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: 123456
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_KEYSTORE_LOCATION: /opt/kafka-ui/certs/kafka.keystore.jks
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_KEYSTORE_PASSWORD: 123456
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "" # Отключает проверку имени хоста
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: PLAIN
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="controller_user" password="bitnami";
+    volumes:
+      - ./kafka/cert/keystore/kafka.keystore.jks:/opt/kafka-ui/certs/kafka.keystore.jks:ro
+      - ./kafka/cert/truststore/kafka.truststore.jks:/opt/kafka-ui/certs/kafka.truststore.jks:ro
+    networks:
+      - kafka
+
 networks:
+  kafka:
+    driver: bridge
+    name: kafka
+    external: true
   postgres_network:
