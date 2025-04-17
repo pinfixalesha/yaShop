@@ -43,7 +43,7 @@ services:
   kafka:
     image: bitnami/kafka
     container_name: kafka
-    hostname: example.kafka.com
+    hostname: pinyaev.kafka.ru
     ports:
       - "9092:9092"
       - "9093:9093"
@@ -71,7 +71,7 @@ services:
       - kafka
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: example.kafka.com:9092
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: pinyaev.kafka.ru:9092
       KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SASL_SSL
       KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /opt/kafka-ui/certs/kafka.truststore.jks
       KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: 123456
